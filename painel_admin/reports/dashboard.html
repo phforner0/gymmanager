@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatórios</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h1>Relatórios</h1>
+
+    <div class="card" style="margin-top:12px;display:flex;gap:12px;">
+      <div class="card" style="flex:1;padding:12px;text-align:center;">
+        <div class="small">Alunos Ativos</div>
+        <div id="kpi-active" style="font-size:24px;font-weight:700">—</div>
+      </div>
+      <div class="card" style="flex:1;padding:12px;text-align:center;">
+        <div class="small">Receita mês</div>
+        <div id="kpi-revenue" style="font-size:24px;font-weight:700">—</div>
+      </div>
+      <div class="card" style="flex:1;padding:12px;text-align:center;">
+        <div class="small">Check-ins hoje</div>
+        <div id="kpi-checkins" style="font-size:24px;font-weight:700">—</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;">Retenção por coorte - Placeholder</div>
+    <div class="small" style="margin-top:8px;">BACKEND-INTEGRATE: reports endpoints</div>
+    <div style="margin-top:8px;"><button id="btnInstructors" class="btn">Comparativo Instrutores</button></div>
+    <div id="instructorsTable" style="margin-top:12px;"></div>
+
+  </div>
+</main></div>
+<script src="../assets/js/app.js"></script></body></html>

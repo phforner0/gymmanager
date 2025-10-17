@@ -1,0 +1,14 @@
+[
+  {
+    "date": "01/08/2025",
+    "student": "Ana Silva",
+    "amount": 89.9,
+    "status": "Recebido"
+  },
+  {
+    "date": "02/08/2025",
+    "student": "Bruno Costa",
+    "amount": 119.9,
+    "status": "Pendente"
+  }
+]

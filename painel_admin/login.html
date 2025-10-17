@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login</title><link rel="stylesheet" href="./assets/css/styles.css"></head>
+<body>
+<div class="container" style="max-width:420px;margin-top:60px;">
+  <div class="card">
+    <h2>Entrar</h2>
+    <form id="loginForm">
+      <div class="form-row"><label>Email<input class="input" id="email" name="email" type="email" /></label></div>
+      <div class="form-row"><label>Senha<input class="input" id="password" name="password" type="password" /></label></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn primary" type="submit">Entrar</button>
+        <a class="btn ghost" href="/register.html">Criar conta</a>
+      </div>
+      <div class="small" style="margin-top:8px;">BACKEND-INTEGRATE: POST /auth/login</div>
+    </form>
+  </div>
+</div>
+<script src="./assets/js/app.js"></script>
+
+<script type="module" src="./assets/js/ui.js"></script>
+<script type="module" src="./assets/js/api.js"></script>
+<script type="module" src="./assets/js/validate.js"></script>
+<script type="module" src="./assets/js/pages/login.js"></script>
+</body>
+</html>

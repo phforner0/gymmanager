@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Financeiro</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h1>Financeiro</h1>
+    <div class="card" style="margin-top:12px;">
+      <div class="small">Transações recentes</div>
+      
+    <div class="card" style="margin-top:12px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="date" id="fromDate" class="input" />
+        <input type="date" id="toDate" class="input" />
+        <select id="statusFilter" class="input">
+          <option value="">Todos</option>
+          <option value="received">Recebido</option>
+          <option value="pending">Pendente</option>
+          <option value="failed">Falha</option>
+        </select>
+        <button id="btnFilter" class="btn">Aplicar</button>
+        <button id="btnExportPayments" class="btn" style="margin-left:auto">Exportar CSV</button>
+      </div>
+    </div>
+<table class="table" style="margin-top:8px;">
+        <thead><tr><th>Data</th><th>Aluno</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody><tr><td>01/08/2025</td><td>Ana Silva</td><td>R$ 89,90</td><td>Recebido</td></tr></tbody>
+      </table>
+      <div class="small" style="margin-top:8px;">BACKEND-INTEGRATE: payments endpoints, webhooks</div>
+    </div>
+  </div>
+</main></div>
+<script src="../assets/js/app.js"></script>
+<script type="module" src="../assets/js/ui.js"></script>
+<script type="module" src="../assets/js/api.js"></script>
+<script type="module" src="../assets/js/pages/payments.js"></script>
+
+<!-- Payment Link Modal -->
+<div id="paymentLinkModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:10000;">
+  <h3 id="paymentLinkTitle">Link de Pagamento</h3>
+  <div style="margin-top:8px;"><input id="paymentLinkInput" class="input" readonly /></div>
+  <div style="margin-top:12px;text-align:right;">
+    <button id="paymentLinkClose" class="btn">Fechar</button>
+    <button id="paymentLinkCopy" class="btn">Copiar</button>
+  </div>
+</div>
+
+</body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aulas</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h1>Agenda - Aulas</h1>
+    <div class="card" style="margin-top:12px;">
+      <div class="small">Calendário placeholder (drag & drop será integrado)</div>
+      
+<div style="margin:12px 0;"><button id="btnNewClass" class="btn primary">Criar Aula</button></div>
+<div style="display:grid;grid-template-columns:repeat(7,1fr);"><div style="grid-column:1/-1;margin-bottom:8px;"><button id="btnNewClass" class="btn primary">Nova Aula</button></divgap:8px;margin-top:12px;">
+        <div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 1</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 2</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 3</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 4</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 5</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 6</div><div style="padding:12px;background:#f8fafc;border-radius:8px;height:120px;">Dia 7</div>
+      </div>
+    </div>
+  </div>
+</main></div>
+<script src="../assets/js/app.js"></script>
+<script type="module" src="../assets/js/ui.js"></script>
+<script type="module" src="../assets/js/api.js"></script>
+<script type="module" src="../assets/js/pages/classes.js"></script>
+
+<!-- Class Modal -->
+<div id="classModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:10000;">
+  <h3 id="classModalTitle">Criar / Editar Aula</h3>
+  <div style="margin-top:8px;">
+    <label>Dia (Seg/ Ter/ ...)</label><input id="class_day" class="input" />
+    <label style="margin-top:8px;">Hora</label><input id="class_time" class="input" />
+    <label style="margin-top:8px;">Título</label><input id="class_title" class="input" />
+    <label style="margin-top:8px;">Capacidade</label><input id="class_capacity" class="input" type="number" />
+  </div>
+  <div style="margin-top:12px;text-align:right;">
+    <button id="classCancel" class="btn">Cancelar</button>
+    <button id="classSave" class="btn primary">Salvar</button>
+  </div>
+</div>
+
+</body></html>

@@ -1,0 +1,78 @@
+{
+  "week": [
+    {
+      "day": "Seg",
+      "items": [
+        {
+          "title": "Spinning",
+          "time": "07:00",
+          "capacity": 20
+        },
+        {
+          "title": "Cross",
+          "time": "18:00",
+          "capacity": 15
+        }
+      ]
+    },
+    {
+      "day": "Ter",
+      "items": [
+        {
+          "title": "Yoga",
+          "time": "08:00",
+          "capacity": 12
+        }
+      ]
+    },
+    {
+      "day": "Qua",
+      "items": [
+        {
+          "title": "Pilates",
+          "time": "09:00",
+          "capacity": 10
+        },
+        {
+          "title": "Boxe",
+          "time": "19:00",
+          "capacity": 10
+        }
+      ]
+    },
+    {
+      "day": "Qui",
+      "items": [
+        {
+          "title": "Funcional",
+          "time": "07:00",
+          "capacity": 16
+        }
+      ]
+    },
+    {
+      "day": "Sex",
+      "items": [
+        {
+          "title": "HIIT",
+          "time": "18:30",
+          "capacity": 18
+        }
+      ]
+    },
+    {
+      "day": "Sáb",
+      "items": [
+        {
+          "title": "Zumba",
+          "time": "10:00",
+          "capacity": 25
+        }
+      ]
+    },
+    {
+      "day": "Dom",
+      "items": []
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+/* Design Tokens */
+:root{
+  --bg:#f7fafc;
+  --surface:#ffffff;
+  --muted:#6b7280;
+  --text:#0f172a;
+  --accent:#4f46e5;
+  --accent-contrast:#ffffff;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --radius:10px;
+  --gap:16px;
+  --shadow: 0 6px 18px rgba(16,24,40,0.06);
+  --focus: 0 0 0 3px rgba(79,70,229,.25);
+}

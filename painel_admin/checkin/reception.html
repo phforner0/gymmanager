@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recepção</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h1>Recepção - Check-in Rápido</h1>
+    <div class="card" style="margin-top:12px;">
+      <input class="input" id="receptionSearch" placeholder="Buscar aluno por nome / cartão / QR" />
+      <div style="margin-top:8px;">
+        <button class="btn primary">Check-in</button>
+        <button class="btn" style="margin-left:8px;">Check-in aula</button>
+        <button class="btn danger" style="margin-left:8px;">Visitante</button>
+      </div>
+      <div class="small" style="margin-top:8px;">BACKEND-INTEGRATE: POST /checkins
+      <div id="recentCheckins" style="margin-top:12px;">
+        <div class="small">Últimos check-ins</div>
+        <ul id="recentList" style="margin-top:8px;"></ul>
+      </div>
+ (scan) / checkin via QR</div>
+    </div>
+  </div>
+</main></div>
+<script src="../assets/js/app.js"></script><script type="module" src="../assets/js/pages/checkin.js"></script>
+</body></html>

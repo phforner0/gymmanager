@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Alunos</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h1>Alunos</h1>
+      <a class="btn primary" href="/students/profile.html?new=1">Novo aluno</a>
+    </div>
+    
+    <div class="card" style="margin-top:12px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="input" id="q" placeholder="Buscar por nome, email ou telefone" />
+        <select id="pageSize" class="input" style="width:120px;">
+          <option value="5">5 por página</option>
+          <option value="10" selected>10 por página</option>
+          <option value="20">20 por página</option>
+        </select>
+        <select id="sortBy" class="input" style="width:160px;">
+          <option value="">Ordenar</option>
+          <option value="name:asc">Nome ↑</option>
+          <option value="name:desc">Nome ↓</option>
+        </select>
+        <button id="btnSearch" class="btn">Buscar</button>
+        <div style="margin-left:auto">
+          <button id="prevPage" class="btn">Anterior</button>
+          <span id="pageInfo" style="margin:0 8px">1/1</span>
+          <button id="nextPage" class="btn">Próxima</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="bulkToolbar" style="display:none;margin-top:8px;gap:8px;align-items:center;">
+      <span id="bulkCount">0 selecionados</span>
+      <button id="btnBulkActivate" class="btn">Ativar</button>
+      <button id="btnBulkDeactivate" class="btn">Inativar</button>
+      <button id="btnBulkEmail" class="btn">Enviar e-mail</button>
+    </div>
+
+    <!-- Container dedicado para a tabela -->
+    <div id="studentsTable" style="margin-top:12px;">
+      <!-- A tabela será renderizada aqui pelo JavaScript -->
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script type="module" src="../assets/js/ui.js"></script>
+<script type="module" src="../assets/js/api.js"></script>
+<script type="module" src="../assets/js/pages/students-list.js"></script>
+
+<!-- Student Edit Modal -->
+<div id="studentModal" class="modal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:10000;">
+  <h3 id="studentModalTitle">Editar aluno</h3>
+  <div style="margin-top:8px;">
+    <label>Nome</label><input id="modal_name" class="input" />
+    <label style="margin-top:8px;">Email</label><input id="modal_email" class="input" />
+    <label style="margin-top:8px;">Telefone</label><input id="modal_phone" class="input" />
+  </div>
+  <div style="margin-top:12px;text-align:right;">
+    <button id="modalCancel" class="btn">Cancelar</button>
+    <button id="modalSave" class="btn primary">Salvar</button>
+  </div>
+</div>
+
+</body>
+</html>

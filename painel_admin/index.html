@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - GymManager</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html" class="active">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h1>Dashboard</h1>
+
+    <!-- KPIs dinâmicos -->
+    <section class="grid cols-3" style="margin-top:12px;">
+      <!-- O EnhancedDashboard vai inserir os cartões aqui -->
+    </section>
+
+    <!-- Gráficos e timeline -->
+    <section style="margin-top:16px;">
+      <!-- O EnhancedDashboard vai inserir os gráficos aqui -->
+    </section>
+  </div>
+</main>
+</div>
+
+<!-- Scripts -->
+<script src="./assets/js/app.js"></script>
+<script type="module" src="./assets/js/ui.js"></script>
+<script src="./assets/js/pages/gymmanager_mock_data.js"></script>
+
+<script type="module">
+  import EnhancedDashboard from './assets/js/pages/dashboard.js';
+  new EnhancedDashboard();
+</script>
+
+
+</body>
+</html>

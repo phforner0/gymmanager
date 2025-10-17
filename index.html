@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#ef4444" />
+  <title>Academia Impacto – Transforme seu corpo, mude sua vida</title>
+  <meta name="description" content="A melhor academia de Taubaté. Equipamentos modernos, professores qualificados e planos flexíveis. Agende sua visita!" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f8fafc;--surface:#ffffff;--muted:#6b7280;--text:#0f172a;
+      --accent:#ef4444;--accent-light:#fca5a5;--accent-dark:#b91c1c;
+      --success:#10b981;--info:#3b82f6;--warning:#f59e0b;
+      --glass:rgba(255,255,255,0.7);--glass-dark:rgba(15,23,42,0.05);
+      --radius:16px;--shadow:0 8px 30px rgba(2,6,23,0.08);
+      --shadow-lg:0 20px 60px rgba(2,6,23,0.12);
+      --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+      font-family:'Inter',system-ui,-apple-system,sans-serif;
+    }
+    [data-theme="dark"]{
+      --bg:#0a0f1e;--surface:#111827;--muted:#9ca3af;--text:#f3f4f6;
+      --glass:rgba(17,24,39,0.8);--glass-dark:rgba(255,255,255,0.05);
+      --shadow:0 10px 40px rgba(0,0,0,0.5);--shadow-lg:0 25px 70px rgba(0,0,0,0.7);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none;transition:var(--transition)}
+    
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    
+    /* Header */
+    header{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:var(--glass);border-bottom:1px solid var(--glass-dark);transition:var(--transition)}
+    header.scrolled{box-shadow:var(--shadow)}
+    
+    nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.3rem}
+    .logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;box-shadow:0 4px 12px rgba(239,68,68,0.3)}
+    
+    .nav-links{display:flex;gap:32px;align-items:center}
+    .nav-links a{font-weight:500;position:relative;padding:8px 0}
+    .nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width 0.3s}
+    .nav-links a:hover::after{width:100%}
+    
+    .btn,.btn-primary,.btn-secondary,.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;border:none;transition:var(--transition);font-size:0.95rem;text-align:center;white-space:nowrap}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff !important;box-shadow:0 4px 12px rgba(239,68,68,0.3)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(239,68,68,0.4)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-secondary{background:var(--surface);border:2px solid var(--glass-dark);color:var(--text)}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-ghost{background:transparent;color:var(--muted);padding:8px 16px}
+    .btn-ghost:hover{color:var(--accent);background:var(--glass)}
+    
+    .theme-toggle{width:48px;height:48px;border-radius:12px;background:var(--surface);border:2px solid var(--glass-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:1.2rem}
+    .theme-toggle:hover{border-color:var(--accent);transform:rotate(180deg)}
+    
+    .mobile-toggle{display:none;width:48px;height:48px;background:var(--surface);border:2px solid var(--glass-dark);border-radius:12px;cursor:pointer}
+    
+    /* Hero */
+    .hero{padding:80px 0;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(239,68,68,0.1),transparent);border-radius:50%;animation:float 20s infinite}
+    
+    .hero-content{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+    .hero-text h1{font-size:3.5rem;font-weight:800;line-height:1.1;margin-bottom:24px;background:linear-gradient(135deg,var(--text),var(--muted));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-text .highlight{color:var(--accent);-webkit-text-fill-color:var(--accent)}
+    .hero-text p{font-size:1.2rem;color:var(--muted);margin-bottom:32px;line-height:1.8}
+    
+    .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+    .stat-item{text-align:center}
+    .stat-value{font-size:2.5rem;font-weight:800;color:var(--accent);display:block}
+    .stat-label{font-size:0.9rem;color:var(--muted)}
+    
+    .hero-visual{position:relative}
+    .hero-card{background:var(--surface);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;border:1px solid var(--glass-dark)}
+    .hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light))}
+    
+    .feature-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--glass);border-radius:999px;font-size:0.85rem;font-weight:600;margin-bottom:16px;border:1px solid var(--glass-dark)}
+    
+    .cta-group{display:flex;gap:16px;flex-wrap:wrap}
+    
+    /* Features */
+    .features{padding:80px 0;background:var(--glass)}
+    .section-header{text-align:center;margin-bottom:64px}
+    .section-title{font-size:2.5rem;font-weight:800;margin-bottom:16px}
+    .section-subtitle{font-size:1.1rem;color:var(--muted)}
+    
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px}
+    .feature-card{background:var(--surface);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow);transition:var(--transition);border:1px solid var(--glass-dark);position:relative;overflow:hidden}
+    .feature-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:var(--accent);transform:scaleX(0);transition:transform 0.3s}
+    .feature-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg)}
+    .feature-card:hover::before{transform:scaleX(1)}
+    
+    .feature-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:20px;box-shadow:0 4px 12px rgba(239,68,68,0.2)}
+    .feature-card h3{font-size:1.3rem;margin-bottom:12px}
+    .feature-card p{color:var(--muted);line-height:1.7}
+    
+    /* Pricing */
+    .pricing{padding:80px 0;background:var(--glass)}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px}
+    .price-card{background:var(--surface);border-radius:var(--radius);padding:40px 32px;box-shadow:var(--shadow);transition:var(--transition);border:2px solid var(--glass-dark);position:relative;display:flex;flex-direction:column}
+    .price-card.featured{border-color:var(--accent);transform:scale(1.05);box-shadow:var(--shadow-lg)}
+    .price-card.featured::before{content:'MAIS POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:6px 20px;border-radius:999px;font-size:0.75rem;font-weight:700}
+    
+    .price-header h3{font-size:1.5rem;margin-bottom:8px}
+    .price-amount{font-size:3rem;font-weight:800;color:var(--accent);margin:20px 0}
+    .price-amount span{font-size:1.2rem;color:var(--muted)}
+    .price-features{list-style:none;margin:24px 0;flex-grow:1}
+    .price-features li{padding:12px 0;border-bottom:1px solid var(--glass-dark);display:flex;align-items:center;gap:12px}
+    .price-features li::before{content:'✓';color:var(--success);font-weight:700;font-size:1.2rem}
+    .price-card .btn-primary{margin-top:auto;width:100%}
+    
+    /* Testimonials */
+    .testimonials{padding:80px 0;background:var(--glass)}
+    .testimonial-slider{position:relative;max-width:900px;margin:0 auto}
+    .testimonial-item{background:var(--surface);border-radius:var(--radius);padding:40px;box-shadow:var(--shadow-lg);border:1px solid var(--glass-dark)}
+    .testimonial-text{font-size:1.2rem;line-height:1.8;margin-bottom:24px;font-style:italic;color:var(--muted)}
+    .testimonial-author{display:flex;align-items:center;gap:16px}
+    .testimonial-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent-light),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    .testimonial-info h4{font-weight:600;margin-bottom:4px}
+    .testimonial-info p{font-size:0.85rem;color:var(--muted)}
+    
+    .slider-controls{display:flex;justify-content:center;gap:16px;margin-top:32px}
+    .slider-dot{width:12px;height:12px;border-radius:50%;background:var(--muted);cursor:pointer;transition:var(--transition)}
+    .slider-dot.active{background:var(--accent);transform:scale(1.5)}
+    
+    /* CTA Section */
+    .cta-section{padding:80px 0;text-align:center;position:relative;overflow:hidden}
+    .cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(239,68,68,0.15),transparent);border-radius:50%}
+    .cta-content{position:relative;z-index:1;max-width:700px;margin:0 auto}
+    .cta-content h2{font-size:3rem;font-weight:800;margin-bottom:24px}
+    
+    /* Footer */
+    footer{background:var(--surface);padding:60px 0 24px;border-top:1px solid var(--glass-dark)}
+    .footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;margin-bottom:40px}
+    .footer-col h4{margin-bottom:16px;font-size:1.1rem}
+    .footer-links{list-style:none}
+    .footer-links li{margin-bottom:12px}
+    .footer-links a{color:var(--muted);transition:var(--transition)}
+    .footer-links a:hover{color:var(--accent)}
+    .footer-bottom{Padding-top:24px;border-top:1px solid var(--glass-dark);text-align:center;color:var(--muted)}
+    
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+    .modal-backdrop.active{display:flex}
+    .modal{background:var(--surface);border-radius:var(--radius);padding:32px;max-width:500px;width:100%;box-shadow:var(--shadow-lg);border:1px solid var(--glass-dark);max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .modal-close{width:36px;height:36px;border-radius:8px;background:var(--glass);border:1px solid var(--glass-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+    .modal-close:hover{background:var(--accent);color:#fff}
+    
+    .form-group{margin-bottom:20px}
+    .form-label{display:block;margin-bottom:8px;font-weight:600;font-size:0.9rem}
+    .form-input{width:100%;padding:12px;border-radius:8px;border:2px solid var(--glass-dark);background:var(--surface);color:var(--text);font-family:inherit;transition:var(--transition)}
+    .form-input:focus{outline:none;border-color:var(--accent)}
+    
+    /* Animations */
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    
+    .fade-in{animation:fadeIn 0.6s ease-out forwards}
+    
+    /* Responsive */
+    @media(max-width:1024px){
+      .hero-content{grid-template-columns:1fr;gap:40px}
+      .hero-text h1{font-size:2.5rem}
+      .nav-links{display:none}
+      .mobile-toggle{display:flex}
+      .features-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    
+    @media(max-width:768px){
+      .hero-text h1{font-size:2rem}
+      .hero-stats{grid-template-columns:1fr}
+      .section-title{font-size:2rem}
+      .cta-content h2{font-size:2rem}
+      .pricing-grid{grid-template-columns:1fr}
+      .price-card.featured{transform:scale(1)}
+      .features-grid{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr}
+      .cta-group{flex-direction:column}
+      .cta-group .btn-primary,.cta-group .btn-secondary{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <nav class="container">
+      <div class="logo">
+        <div class="logo-icon">💪</div>
+        <div>
+          <div>Academia Impacto</div>
+          <div style="font-size:0.7rem;font-weight:400;color:var(--muted)">Transforme-se hoje</div>
+        </div>
+      </div>
+      
+      <div class="nav-links">
+        <a href="#features">Diferenciais</a>
+        <a href="#pricing">Planos</a>
+        <button class="btn-ghost" id="nav-login">Entrar</button>
+        <button class="btn-primary" id="nav-cta">Começar Agora</button>
+      </div>
+      
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Alternar tema">🌙</button>
+        <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text fade-in">
+          <h1>Transforme seu <span class="highlight">corpo</span>, mude sua <span class="highlight">vida</span></h1>
+          <p>A melhor academia de Taubaté com equipamentos de última geração, professores certificados e ambiente motivador. Sua jornada fitness começa aqui.</p>
+          
+          <div class="cta-group">
+            <button class="btn-primary" id="hero-cta">🎯 Agendar Visita Gratuita</button>
+            <button class="btn-secondary" id="hero-login">Já sou aluno</button>
+          </div>
+          
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-value">2.500+</span>
+              <span class="stat-label">Alunos Ativos</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">15</span>
+              <span class="stat-label">Anos de Experiência</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">98%</span>
+              <span class="stat-label">Satisfação</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-visual fade-in">
+          <div class="hero-card">
+            <span class="feature-badge">🔥 Oferta Especial</span>
+            <h3 style="font-size:1.5rem;margin-bottom:16px">Primeiro mês com 50% OFF</h3>
+            <p style="color:var(--muted);margin-bottom:24px">Matricule-se agora e ganhe avaliação física gratuita + plano de treino personalizado</p>
+            
+            <div style="background:var(--glass);padding:20px;border-radius:12px;margin-bottom:20px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                <span>✓ Acesso 24/7</span>
+                <span style="color:var(--success);font-weight:700">Incluído</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                <span>✓ App exclusivo</span>
+                <span style="color:var(--success);font-weight:700">Incluído</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span>✓ Conteúdos exclusivos</span>
+                <span style="color:var(--success);font-weight:700">Incluído</span>
+              </div>
+            </div>
+            
+            <button class="btn-primary" style="width:100%" id="card-cta">Garantir Desconto</button>
+            <p style="text-align:center;margin-top:12px;font-size:0.85rem;color:var(--muted)">Vagas limitadas • Sem taxa de matrícula</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Por que escolher a Impacto?</h2>
+        <p class="section-subtitle">Tecnologia, expertise e dedicação para você alcançar seus objetivos</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🏋️</div>
+          <h3>Equipamentos Premium</h3>
+          <p>Máquinas importadas de última geração, área completa de peso livre e zona funcional equipada.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">⏰</div>
+          <h3>Aberto 24 Horas</h3>
+          <p>Treine no seu horário com acesso liberado 24/7, todos os dias da semana incluindo feriados.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">👨‍🏫</div>
+          <h3>Professores CREF</h3>
+          <p>Equipe qualificada e certificada para garantir sua segurança e maximizar seus resultados.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>App Exclusivo</h3>
+          <p>Acompanhe treinos, evolução, agendamentos e tenha acesso a conteúdos exclusivos.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Treino Personalizado</h3>
+          <p>Planos individualizados baseados em avaliação física completa e seus objetivos.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🥗</div>
+          <h3>Nutrição Esportiva</h3>
+          <p>Orientação nutricional especializada incluída em todos os planos premium.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Planos que cabem no seu bolso</h2>
+        <p class="section-subtitle">Sem taxa de matrícula • Sem fidelidade • Cancele quando quiser</p>
+      </div>
+      
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-header">
+            <h3>Mensal</h3>
+            <p style="color:var(--muted);font-size:0.9rem">Flexibilidade total</p>
+          </div>
+          <div class="price-amount">R$ 149<span>/mês</span></div>
+          <ul class="price-features">
+            <li>Acesso ilimitado 24/7</li>
+            <li>App com treinos</li>
+            <li>Área de musculação</li>
+            <li>Vestiários e armários</li>
+          </ul>
+          <button class="btn-primary" style="width:100%">Começar Agora</button>
+        </div>
+        
+        <div class="price-card featured">
+          <div class="price-header">
+            <h3>Trimestral</h3>
+            <p style="color:var(--muted);font-size:0.9rem">Mais economia</p>
+          </div>
+          <div class="price-amount">R$ 399<span>/3 meses</span></div>
+          <ul class="price-features">
+            <li>Tudo do plano Mensal</li>
+            <li>Economia de 10%</li>
+            <li>Avaliação física gratuita</li>
+            <li>Plano de treino personalizado</li>
+            <li>Consultoria nutricional</li>
+            <li>Suporte prioritário</li>
+          </ul>
+          <button class="btn-primary" style="width:100%">Melhor Escolha</button>
+        </div>
+        
+        <div class="price-card">
+          <div class="price-header">
+            <h3>Anual</h3>
+            <p style="color:var(--muted);font-size:0.9rem">Máximo benefício</p>
+          </div>
+          <div class="price-amount">R$ 1.299<span>/ano</span></div>
+          <ul class="price-features">
+            <li>Tudo do plano Trimestral</li>
+            <li>Economia de 27%</li>
+            <li>2 sessões de personal</li>
+            <li>Acompanhamento mensal</li>
+            <li>Acesso a eventos exclusivos</li>
+            <li>1 guest pass por mês</li>
+            <li>Toalha e shaker grátis</li>
+          </ul>
+          <button class="btn-primary" style="width:100%">Garantir Vaga</button>
+        </div>
+      </div>
+      
+      <div style="text-align:center;margin-top:40px;padding:32px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow)">
+        <h3 style="margin-bottom:16px">Plano Corporativo</h3>
+        <p style="color:var(--muted);margin-bottom:20px">Condições especiais para empresas com 5+ colaboradores</p>
+        <button class="btn-secondary">Solicitar Proposta</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trainers & Classes REMOVED -->
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">O Que Nossos Alunos Dizem</h2>
+        <p class="section-subtitle">Histórias reais de transformação</p>
+      </div>
+      
+      <div class="testimonial-slider">
+        <div class="testimonial-item" id="testimonial-content">
+          <div class="testimonial-text">
+            "Perdi 15kg em 4 meses com o acompanhamento da equipe. O ambiente é incrível e os professores sempre motivam. Melhor decisão que tomei!"
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">CP</div>
+            <div class="testimonial-info">
+              <h4>Carlos Pereira</h4>
+              <p>Aluno há 8 meses • Plano Anual</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="slider-controls">
+          <span class="slider-dot active" data-slide="0"></span>
+          <span class="slider-dot" data-slide="1"></span>
+          <span class="slider-dot" data-slide="2"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Pronto para sua transformação?</h2>
+        <p style="font-size:1.2rem;color:var(--muted);margin-bottom:32px">Agende sua visita gratuita e conheça nossa estrutura. Sem compromisso!</p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+          <button class="btn-primary" style="font-size:1.1rem;padding:16px 32px" id="final-cta">Agendar Visita Gratuita</button>
+          <button class="btn-secondary" style="font-size:1.1rem;padding:16px 32px">Falar com Consultor</button>
+        </div>
+        <p style="margin-top:24px;color:var(--muted);font-size:0.9rem">📞 (11) 99999-9999 • 📧 contato@impacto.com.br</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="logo" style="margin-bottom:16px">
+            <div class="logo-icon" style="width:48px;height:48px">💪</div>
+            <div>Academia Impacto</div>
+          </div>
+          <p style="color:var(--muted);margin-bottom:16px">Transformando vidas através do fitness há 15 anos.</p>
+          <div style="display:flex;gap:12px">
+            <a href="#" style="width:40px;height:40px;background:var(--glass);border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-dark)">📘</a>
+            <a href="#" style="width:40px;height:40px;background:var(--glass);border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-dark)">📷</a>
+            <a href="#" style="width:40px;height:40px;background:var(--glass);border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-dark)">🐦</a>
+          </div>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Links Rápidos</h4>
+          <ul class="footer-links">
+            <li><a href="#features">Diferenciais</a></li>
+            <li><a href="#pricing">Planos</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Suporte</h4>
+          <ul class="footer-links">
+            <li><a href="#">Central de Ajuda</a></li>
+            <li><a href="#">Perguntas Frequentes</a></li>
+            <li><a href="#">Política de Privacidade</a></li>
+            <li><a href="#">Termos de Uso</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Contato</h4>
+          <ul class="footer-links" style="list-style:none">
+            <li>📍 Rua Exemplo, 123 - Centro</li>
+            <li>📞 (11) 99999-9999</li>
+            <li>📧 contato@impacto.com.br</li>
+            <li>⏰ Aberto 24 horas</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2025 Academia Impacto. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div class="modal-backdrop" id="login-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Entrar na sua conta</h3>
+        <button class="modal-close" id="close-login">✕</button>
+      </div>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="login-email" placeholder="seu@email.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••" required>
+        </div>
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="remember">
+            <span style="font-size:0.9rem">Lembrar-me</span>
+          </label>
+          <a href="#" style="font-size:0.9rem;color:var(--accent)">Esqueci a senha</a>
+        </div>
+        
+        <button type="submit" class="btn-primary" style="width:100%;margin-bottom:12px">Entrar</button>
+        <button type="button" class="btn-secondary" style="width:100%">Criar conta</button>
+        
+        <div id="login-error" style="margin-top:16px;padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;color:var(--accent);display:none;font-size:0.9rem"></div>
+      </form>
+      
+      <div style="margin-top:24px;padding:16px;background:var(--glass);border-radius:8px;font-size:0.85rem;color:var(--muted)">
+        <strong>Contas demo:</strong><br>
+        Admin: admin@impacto.com / admin123<br>
+        Usuário: user@impacto.com / user123
+      </div>
+    </div>
+  </div>
+
+  <!-- Visit Modal -->
+  <div class="modal-backdrop" id="visit-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Agendar Visita Gratuita</h3>
+        <button class="modal-close" id="close-visit">✕</button>
+      </div>
+      
+      <form id="visit-form">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" class="form-input" id="visit-name" placeholder="Seu nome" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="visit-email" placeholder="seu@email.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="tel" class="form-input" id="visit-phone" placeholder="(11) 99999-9999" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Melhor dia</label>
+          <input type="date" class="form-input" id="visit-date" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Horário preferido</label>
+          <select class="form-input" id="visit-time" required>
+            <option value="">Selecione</option>
+            <option value="manha">Manhã (6h - 12h)</option>
+            <option value="tarde">Tarde (12h - 18h)</option>
+            <option value="noite">Noite (18h - 22h)</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="btn-primary" style="width:100%">Confirmar Agendamento</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+    
+    const savedTheme = localStorage.getItem('gym_theme') || 'light';
+    if(savedTheme === 'dark'){
+      html.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀️';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('gym_theme', next);
+    });
+
+    // Header Scroll Effect
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      if(window.scrollY > 100){
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Smooth Scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e){
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target){
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Testimonials Slider
+    const testimonials = [
+      {
+        text: 'Perdi 15kg em 4 meses com o acompanhamento da equipe. O ambiente é incrível e os professores sempre motivam. Melhor decisão que tomei!',
+        author: 'Carlos Pereira',
+        avatar: 'CP',
+        info: 'Aluno há 8 meses • Plano Anual'
+      },
+      {
+        text: 'As aulas de HIIT são incríveis! Nunca pensei que conseguiria me exercitar com tanta intensidade. A estrutura é de primeiro mundo.',
+        author: 'Rafaela Santos',
+        avatar: 'RS',
+        info: 'Aluna há 1 ano • Plano Trimestral'
+      },
+      {
+        text: 'Consegui ganhar 8kg de massa magra em 6 meses. O acompanhamento nutricional fez toda diferença. Recomendo demais!',
+        author: 'Paulo Oliveira',
+        avatar: 'PO',
+        info: 'Aluno há 6 meses • Plano Mensal'
+      }
+    ];
+
+    let currentSlide = 0;
+    const testimonialContent = document.getElementById('testimonial-content');
+    const dots = document.querySelectorAll('.slider-dot');
+
+    function updateTestimonial(){
+      const t = testimonials[currentSlide];
+      testimonialContent.innerHTML = `
+        <div class="testimonial-text">"${t.text}"</div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">${t.avatar}</div>
+          <div class="testimonial-info">
+            <h4>${t.author}</h4>
+            <p>${t.info}</p>
+          </div>
+        </div>
+      `;
+      
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        currentSlide = i;
+        updateTestimonial();
+      });
+    });
+
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % testimonials.length;
+      updateTestimonial();
+    }, 6000);
+
+    // Modal Management
+    const loginModal = document.getElementById('login-modal');
+    const visitModal = document.getElementById('visit-modal');
+
+    function openModal(modal){
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modal){
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Login Modal
+    document.getElementById('nav-login').addEventListener('click', () => openModal(loginModal));
+    document.getElementById('hero-login').addEventListener('click', () => openModal(loginModal));
+    document.getElementById('close-login').addEventListener('click', () => closeModal(loginModal));
+
+    // Visit Modal
+    document.getElementById('hero-cta').addEventListener('click', () => openModal(visitModal));
+    document.getElementById('card-cta').addEventListener('click', () => openModal(visitModal));
+    document.getElementById('nav-cta').addEventListener('click', () => openModal(visitModal));
+    document.getElementById('final-cta').addEventListener('click', () => openModal(visitModal));
+    document.getElementById('close-visit').addEventListener('click', () => closeModal(visitModal));
+
+    // Close modals on backdrop click
+    [loginModal, visitModal].forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal(modal);
+      });
+    });
+
+    // Close modals on ESC
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        closeModal(loginModal);
+        closeModal(visitModal);
+      }
+    });
+
+    // Login Form
+    const mockUsers = [
+      {email: 'admin@impacto.com', password: 'admin123', role: 'admin', redirect: 'painel_admin/index.html'},
+      {email: 'user@impacto.com', password: 'user123', role: 'user', redirect: 'painel_usuario/dashboard.html'}
+    ];
+
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const remember = document.getElementById('remember').checked;
+      const errorDiv = document.getElementById('login-error');
+      
+      errorDiv.style.display = 'none';
+      
+      const user = mockUsers.find(u => u.email === email && u.password === password);
+      
+      if(!user){
+        errorDiv.textContent = 'E-mail ou senha incorretos. Use as contas demo abaixo.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      if(remember){
+        localStorage.setItem('logged_user', JSON.stringify({
+          email: user.email,
+          role: user.role,
+          at: new Date().toISOString()
+        }));
+      }
+      
+      setTimeout(() => {
+        window.location.href = user.redirect;
+      }, 500);
+    });
+
+    // Visit Form
+    document.getElementById('visit-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const data = {
+        name: document.getElementById('visit-name').value,
+        email: document.getElementById('visit-email').value,
+        phone: document.getElementById('visit-phone').value,
+        date: document.getElementById('visit-date').value,
+        time: document.getElementById('visit-time').value
+      };
+      
+      console.log('Visita agendada:', data);
+      
+      alert('Agendamento confirmado! Entraremos em contato em breve.');
+      closeModal(visitModal);
+      document.getElementById('visit-form').reset();
+    });
+
+    // Fade-in animation on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    // Observe only the remaining cards (features, pricing, testimonials etc.)
+    document.querySelectorAll('.feature-card, .price-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s, transform 0.6s';
+      observer.observe(el);
+    });
+
+    // Mobile Menu (simple toggle)
+    const mobileToggle = document.getElementById('mobile-toggle');
+    mobileToggle.addEventListener('click', () => {
+      alert('Menu mobile - Em desenvolvimento. Use os links da seção ou faça login.');
+    });
+
+    console.log('Academia Impacto - Site carregado com sucesso!');
+  </script>
+</body>
+</html>

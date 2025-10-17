@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aluno</title><link rel="stylesheet" href="../assets/css/styles.css"></head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand"><a href="/index.html">GymManager</a></div>
+    <div class="user">Usuário: <strong id="currentUser">Admin</strong></div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="site-sidebar" id="siteSidebar">
+  <nav>
+    <a href="/index.html">Dashboard</a>
+    <div class="sep">Operações</div>
+    <a href="/students/list.html">Alunos</a>
+    <a href="/classes/schedule.html">Aulas / Agenda</a>
+    <a href="/checkin/reception.html">Check-in</a>
+    <a href="/payments/list.html">Financeiro</a>
+    <a href="/reports/dashboard.html">Relatórios</a>
+    <div class="sep">Config</div>
+    <a href="/settings/admin.html">Admin</a>
+    <a href="/login.html" class="danger">Sair</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h1 id="studentName">Ficha do Aluno</h1>
+      <div><a class="btn" href="/students/list.html">Voltar</a> <button class="btn primary" id="btnSave">Salvar</button></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:12px;">
+      <div class="card">
+        <div class="small">Foto</div>
+        <div style="height:140px;width:140px;background:#eef2ff;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:8px 0;">Foto</div>
+        <label class="small">Nome<input class="input" id="f_name" name="name" /></label>
+        <label class="small">E-mail<input class="input" id="f_email" name="email" /></label>
+        <label class="small">Telefone<input class="input" id="f_phone" name="phone" /></label>
+      </div>
+      <div class="card">
+        <div class="small">Plano atual</div>
+        <div style="padding:8px;background:#fff;border-radius:8px;margin-top:8px;">Mensal Basic<br/><span class="small">Vencimento dia 05</span></div>
+        <div style="margin-top:12px;"><button class="btn">Alterar plano</button></div>
+      </div>
+      <div class="card">
+        <div class="small">Linha do tempo</div>
+        <div style="margin-top:8px;">
+          <div style="padding:8px;background:#fff;border-radius:8px;margin-bottom:6px;">01/08/2025 - Check-in</div>
+          <div style="padding:8px;background:#fff;border-radius:8px;">28/07/2025 - Pagamento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+<script src="../assets/js/app.js"></script>
+
+<script type="module" src="../assets/js/ui.js"></script>
+<script type="module" src="../assets/js/api.js"></script>
+<script type="module" src="../assets/js/validate.js"></script>
+<script type="module" src="../assets/js/pages/student-profile.js"></script>
+</body>
+</html>

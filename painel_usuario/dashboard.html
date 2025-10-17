@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel do Usuário – Academia Impacto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="var(--accent)"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        <div>
+          <h1>Painel do Atleta</h1>
+          <div class="muted">Academia Impacto</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="theme-toggle" id="theme-toggle">
+          <div class="theme-toggle-slider"></div>
+        </div>
+        <button class="btn ghost" id="btn-export">💾 Exportar</button>
+        <button class="btn ghost" id="btn-import">📥 Importar</button>
+        <button class="btn" id="btn-logout">🚪 Sair</button>
+      </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="card">
+      <div class="profile-section">
+        <img id="profile-pic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23ef4444' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='32' fill='white' font-family='Arial'%3EU%3C/text%3E%3C/svg%3E" class="profile-pic">
+        <div class="profile-info">
+          <h2 id="u-name">Usuário Impacto</h2>
+          <div class="muted" id="u-email">usuario@exemplo.com</div>
+          <div style="margin-top:8px">
+            <span class="badge primary" id="u-plan">Plano Mensal</span>
+            <span class="badge info">Nível 5</span>
+            <span class="badge success">🔥 7 dias</span>
+          </div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div class="muted">Validade</div>
+          <div style="font-weight:700;font-size:1.1rem" id="plan-exp">2025-12-31</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-4" style="margin-top:20px">
+      <div class="card stat-card">
+        <div class="stat-label">Total de Treinos</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-change up" id="stat-total-change">↗ +0 esta semana</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Concluídos</div>
+        <div class="stat-value" id="stat-done">0</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-done" style="width:0%"></div></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Sequência</div>
+        <div class="stat-value" id="stat-streak">0</div>
+        <div class="muted">dias consecutivos</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Volume Total</div>
+        <div class="stat-value" id="stat-volume">0</div>
+        <div class="muted">kg levantados</div>
+      </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <div class="card" style="margin-top:20px">
+      <div class="tabs">
+        <div class="tab active" data-tab="workouts">💪 Treinos</div>
+        <div class="tab" data-tab="progress">📊 Progresso</div>
+        <div class="tab" data-tab="measurements">📏 Medidas</div>
+        <div class="tab" data-tab="calendar">📅 Calendário</div>
+        <div class="tab" data-tab="achievements">🏆 Conquistas</div>
+        <div class="tab" data-tab="tools">🛠️ Ferramentas</div>
+      </div>
+
+      <!-- Workouts Tab -->
+      <div class="tab-content active" id="tab-workouts">
+        <div class="card-header">
+          <h3 class="card-title">Meus Treinos</h3>
+          <button class="btn" id="btn-new-workout">➕ Novo Treino</button>
+        </div>
+        <div id="workouts-list"></div>
+      </div>
+
+      <!-- Progress Tab -->
+      <div class="tab-content" id="tab-progress">
+        <h3 class="card-title">Evolução de Treinos</h3>
+        <div class="chart-container" id="progress-chart">
+          <canvas id="chart-canvas"></canvas>
+        </div>
+        <div class="grid grid-2" style="margin-top:20px">
+          <div>
+            <h4>Estatísticas da Semana</h4>
+            <table>
+              <tr><th>Segunda</th><td id="week-mon">-</td></tr>
+              <tr><th>Terça</th><td id="week-tue">-</td></tr>
+              <tr><th>Quarta</th><td id="week-wed">-</td></tr>
+              <tr><th>Quinta</th><td id="week-thu">-</td></tr>
+              <tr><th>Sexta</th><td id="week-fri">-</td></tr>
+              <tr><th>Sábado</th><td id="week-sat">-</td></tr>
+              <tr><th>Domingo</th><td id="week-sun">-</td></tr>
+            </table>
+          </div>
+          <div>
+            <h4>Recordes Pessoais</h4>
+            <div id="personal-records"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Measurements Tab -->
+      <div class="tab-content" id="tab-measurements">
+        <div class="card-header">
+          <h3 class="card-title">Medidas Corporais</h3>
+          <button class="btn" id="btn-add-measurement">➕ Adicionar Medida</button>
+        </div>
+        <div id="measurements-list"></div>
+      </div>
+
+      <!-- Calendar Tab -->
+      <div class="tab-content" id="tab-calendar">
+        <div class="card-header">
+          <h3 class="card-title" id="calendar-title">Outubro 2025</h3>
+          <div>
+            <button class="btn ghost sm" id="cal-prev">←</button>
+            <button class="btn ghost sm" id="cal-next">→</button>
+          </div>
+        </div>
+        <div class="calendar" id="calendar-grid"></div>
+        <div style="margin-top:16px">
+          <div class="achievement" style="background:var(--success);color:#fff">
+            <div style="font-size:2rem">🎯</div>
+            <div>
+              <h4>Meta do mês: <span id="monthly-goal">0/12</span> treinos</h4>
+              <div class="progress-bar" style="background:rgba(255,255,255,0.3)"><div class="progress-fill" id="monthly-progress" style="width:0%;background:#fff"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievements Tab -->
+      <div class="tab-content" id="tab-achievements">
+        <h3 class="card-title">Conquistas Desbloqueadas</h3>
+        <div class="grid grid-2" id="achievements-list"></div>
+      </div>
+
+      <!-- Tools Tab -->
+      <div class="tab-content" id="tab-tools">
+        <div class="grid grid-2">
+          <!-- Timer -->
+          <div class="card timer">
+            <h3>Timer de Descanso</h3>
+            <div class="timer-display" id="timer-display">00:00</div>
+            <div class="timer-controls">
+              <button class="btn ghost" id="timer-30">30s</button>
+              <button class="btn ghost" id="timer-60">1min</button>
+              <button class="btn ghost" id="timer-90">90s</button>
+              <button class="btn ghost" id="timer-120">2min</button>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn ghost" id="timer-start">▶ Iniciar</button>
+              <button class="btn ghost" id="timer-reset">↺ Resetar</button>
+            </div>
+          </div>
+
+          <!-- 1RM Calculator -->
+          <div class="card">
+            <h3>Calculadora de 1RM</h3>
+            <div class="form-group">
+              <label class="form-label">Peso (kg)</label>
+              <input type="number" class="input" id="rm-weight" placeholder="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Repetições</label>
+              <input type="number" class="input" id="rm-reps" placeholder="8">
+            </div>
+            <button class="btn" id="calc-rm">Calcular</button>
+            <div id="rm-result" style="margin-top:16px;font-size:1.2rem;font-weight:700;text-align:center"></div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card" style="margin-top:20px">
+          <h3 class="card-title">Anotações</h3>
+          <textarea id="notes" rows="6" class="input" placeholder="Anote seus objetivos, cargas progressivas, observações..."></textarea>
+          <button class="btn" id="save-notes" style="margin-top:12px">💾 Salvar Notas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Workout -->
+  <div class="modal" id="modal-workout">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Novo Treino</h3>
+        <span class="modal-close" id="modal-close">✕</span>
+      </div>
+      <form id="workout-form">
+        <div class="form-group">
+          <label class="form-label">Nome do Treino</label>
+          <input type="text" class="input" id="w-name" placeholder="Ex: Peito & Tríceps" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Dia da Semana</label>
+            <select class="input" id="w-day">
+              <option>Seg</option><option>Ter</option><option>Qua</option>
+              <option>Qui</option><option>Sex</option><option>Sáb</option><option>Dom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoria</label>
+            <select class="input" id="w-category">
+              <option>Força</option><option>Hipertrofia</option><option>Cardio</option>
+              <option>Funcional</option><option>Flexibilidade</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exercícios (um por linha)</label>
+          <textarea class="input" id="w-exercises" rows="6" placeholder="Supino reto 4x8&#10;Supino inclinado 3x10&#10;Crucifixo 3x12"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <input type="text" class="input" id="w-tags" placeholder="peito, triceps, hipertrofia">
+        </div>
+        <div style="display:flex;gap:12px">
+          <button type="submit" class="btn">💾 Salvar</button>
+          <button type="button" class="btn ghost" id="cancel-workout">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Measurement -->
+  <div class="modal" id="modal-measurement">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Adicionar Medida</h3>
+        <span class="modal-close" onclick="document.getElementById('modal-measurement').classList.remove('active')">✕</span>
+      </div>
+      <form id="measurement-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Peso (kg)</label>
+            <input type="number" step="0.1" class="input" id="m-weight">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Altura (cm)</label>
+            <input type="number" class="input" id="m-height">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Peito (cm)</label>
+            <input type="number" step="0.1" class="input" id="m-chest">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cintura (cm)</label>
+            <input type="number" step="0.1" class="input" id="m-waist">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Braço (cm)</label>
+            <input type="number" step="0.1" class="input" id="m-arm">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coxa (cm)</label>
+            <input type="number" step="0.1" class="input" id="m-thigh">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observações</label>
+          <textarea class="input" id="m-notes" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn">💾 Salvar Medida</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="./assets/js/script.js"></script>

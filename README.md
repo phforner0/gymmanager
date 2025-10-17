@@ -1,7 +1,7 @@
 # GymManager - Sistema de Gestão de Academias
 
 ## Descrição
-GymManager é uma solução SaaS completa para gestão de academias de ginástica, oferecendo funcionalidades de controle de alunos, financeiro, check-in, agendamento de aulas e relatórios.
+Nós somos uma solução completa para gestão de academias de musculação, oferecendo funcionalidades de controle de alunos, financeiro, check-in, agendamento de aulas e relatórios.
 
 ## Características Principais
 - ✅ Autenticação segura com Supabase Auth
@@ -17,9 +17,8 @@ GymManager é uma solução SaaS completa para gestão de academias de ginástic
 
 ### Frontend
 - React 18 com TypeScript
-- Tailwind CSS para styling
+- CSS para styling
 - React Query para cache/estado servidor
-- Zustand para estado global
 - Supabase JS Client
 - Vite como bundler
 
@@ -32,64 +31,6 @@ GymManager é uma solução SaaS completa para gestão de academias de ginástic
 - Vercel para deploy (Frontend)
 - Supabase para banco e backend
 - GitHub Actions para CI/CD
-
-## Arquitetura de Pastas
-
-gymmanager/
-├── src/
-│   ├── components/         # Componentes React reutilizáveis
-│   ├── pages/              # Páginas principais
-│   ├── lib/
-│   │   ├── api/            # Funções de API
-│   │   ├── auth.ts         # Autenticação
-│   │   └── supabase.ts     # Cliente Supabase
-│   ├── contexts/           # Context API
-│   ├── hooks/              # Custom hooks
-│   ├── types/              # Tipagens TypeScript
-│   ├── store/              # Zustand stores
-│   └── App.tsx
-├── tests/                  # Testes automatizados
-├── .github/
-│   └── workflows/          # GitHub Actions
-├── .env.local              # Variáveis de ambiente
-├── vite.config.ts
-└── tsconfig.json
-
-## Configuração Inicial
-
-### Pré-requisitos
-- Node.js 18+
-- npm ou yarn
-- Conta Supabase (gratuita)
-- Conta Vercel (gratuita)
-
-### Instalação
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/gymmanager.git
-cd gymmanager
-```
-
-2. Instale dependências:
-```bash
-npm install
-```
-
-3. Configure variáveis de ambiente:
-```bash
-cp .env.example .env.local
-```
-
-4. Preencha `.env.local`:
-
-VITE_SUPABASE_URL=sua_url
-VITE_SUPABASE_ANON_KEY=sua_chave
-
-5. Inicie o servidor de desenvolvimento:
-```bash
-npm run dev
-```
 
 ## Roadmap de Desenvolvimento
 
@@ -150,4 +91,4 @@ Para dúvidas: criar uma Issue no repositório
 
 ---
 **Última atualização**: [17/10/2025]
-**Mantido por**: Equipe GymManager
+**Mantido por**: Pedro Henrique Forner; Iran Moreira Freitas; Gabriel Mendonça do Patrocinio; Rodrigo Cunha

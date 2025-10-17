@@ -1,4 +1,4 @@
-# GymManager - Sistema de Gestão de Academias
+# Sistema de Gestão de Academias
 
 ## Descrição
 Nós somos uma solução completa para gestão de academias de musculação, oferecendo funcionalidades de controle de alunos, financeiro, check-in, agendamento de aulas e relatórios.

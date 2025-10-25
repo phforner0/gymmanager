@@ -4,7 +4,7 @@
 Nós somos uma solução completa para gestão de academias de musculação, oferecendo funcionalidades de controle de alunos, financeiro, check-in, agendamento de aulas e relatórios.
 
 ## Características Principais
-- ✅ Autenticação segura com Supabase Auth
+- ✅ Autenticação segura
 - ✅ Gestão multi-tenant (múltiplas academias)
 - ✅ Dashboard com KPIs em tempo real
 - ✅ Sistema de check-in inteligente
@@ -37,19 +37,19 @@ Nós somos uma solução completa para gestão de academias de musculação, ofe
 ### MVP
 - [x] Setup inicial do projeto
 - [ ] Autenticação básica
-- [ ] CRUD de alunos
-- [ ] Dashboard com KPIs
-- [ ] Check-in simples
+- [x] CRUD de alunos
+- [x] Dashboard com KPIs
+- [x] Check-in simples
 
 ### Fase 2
 - [ ] Sistema financeiro completo
-- [ ] Agendamento de aulas
+- [x] Agendamento de aulas
 - [ ] Notificações
 
 ### Fase 3
 - [ ] App mobile (React Native)
-- [ ] Relatórios avançados
-- [ ] Gamificação
+- [x] Relatórios avançados
+- [x] Gamificação
 
 ## Como Contribuir
 

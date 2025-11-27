@@ -266,7 +266,7 @@ Abaixo estão os **Sprints** planejados para o projeto. Cada sprint tem objetivo
 
 ### Sprint 01
 **Objetivo:** Finalizar work in progress e revisar/aceitar autenticação e redirecionamento para permitir deploy estável.  
-**Issues atribuídos:** `#8`, `#14`, `#1`, `#17`
+**Issues atribuídos:** `#8`, `#1`, `#17`
 
 **Critérios de aceitação (por issue):**
 - **#8 — Interface de busca para check-in**
@@ -288,7 +288,7 @@ Abaixo estão os **Sprints** planejados para o projeto. Cada sprint tem objetivo
 ### Sprint 02 — *Features & Refactor*
 **Período:** 2025-12-15 → 2025-12-28  
 **Objetivo:** Entregar autenticação real, testes automatizados, KPIs do dashboard, refatorar componentes compartilhados e proteger rotas.  
-**Issues atribuídos:** `#13`, `#12`, `#7`, `#15`, `#16`
+**Issues atribuídos:**  `#7`, `#15`, `#16`
 
 **Critérios de aceitação (por issue):**
 - **#7 — Dashboard com KPIs principais**

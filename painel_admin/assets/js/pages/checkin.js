@@ -4,7 +4,16 @@ import { apiPost } from '../api.js';
 const input = document.querySelector('#receptionSearch');
 const btn = document.querySelector('.card .btn.primary');
 
-let recent = JSON.parse(localStorage.getItem('recentCheckins')||'[]');
+let recent = [];
+
+// Load from mock data if available
+if (window.mockData && window.mockData.checkins) {
+  recent = window.mockData.checkins.slice(-10).map(c => ({
+    id: c.id,
+    name: `Aluno #${c.studentId}`,
+    time: new Date(c.datetime).toLocaleString()
+  }));
+}
 
 function renderRecent(){
   const ul = document.querySelector('#recentList');
@@ -21,7 +30,6 @@ function renderRecent(){
     b.addEventListener('click', async (ev)=>{
       const idx = parseInt(b.getAttribute('data-idx'),10);
       const item = recent.splice(recent.length - 1 - idx, 1);
-      localStorage.setItem('recentCheckins', JSON.stringify(recent));
       renderRecent();
       showToast({type:'info', title:'Desfeito', message:'Check-in desfeito localmente.'});
       // optionally call API to undo if available
@@ -36,7 +44,6 @@ async function doCheckin(query){
     const res = await apiPost('/checkins', {query});
     const entry = { id: res.id, name: query, time: new Date().toLocaleString() };
     recent.push(entry);
-    localStorage.setItem('recentCheckins', JSON.stringify(recent));
     renderRecent();
     showToast({type:'success', title:'OK', message:'Check-in registrado.'});
   }catch(e){

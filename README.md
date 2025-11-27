@@ -1,94 +1,265 @@
-# Sistema de Gestão de Academias
+# 🏋️ GymManager - Sistema de Gestão de Academia
 
-## Descrição
-Nós somos uma solução completa para gestão de academias de musculação, oferecendo funcionalidades de controle de alunos, financeiro, check-in, agendamento de aulas e relatórios.
+Sistema completo para gestão de academias desenvolvido em React + TypeScript com arquitetura modular e componentizada.
 
-## Características Principais
-- ✅ Autenticação segura
-- ✅ Gestão multi-tenant (múltiplas academias)
-- ✅ Dashboard com KPIs em tempo real
-- ✅ Sistema de check-in inteligente
-- ✅ Controle financeiro completo
-- ✅ Agendamento de aulas
-- ✅ Notificações automáticas
-- ✅ Row Level Security (RLS) no banco de dados
+## 📋 Características
 
-## Stack Tecnológico
+- **Gestão de Alunos**: Cadastro completo, busca, filtros e exportação CSV
+- **Agenda de Aulas**: Calendário semanal com gestão de horários e instrutores
+- **Check-in Digital**: Sistema rápido de registro de entrada
+- **Financeiro**: Controle de pagamentos, mensalidades e inadimplência
+- **Relatórios**: Dashboard com métricas, gráficos e análises
+- **Design Responsivo**: Interface adaptável para desktop, tablet e mobile
 
-### Frontend
-- React 18 com TypeScript
-- CSS para styling
-- React Query para cache/estado servidor
-- Supabase JS Client
-- Vite como bundler
+## 🚀 Tecnologias
 
-### Backend
-- Supabase (PostgreSQL + Auth + Realtime)
-- Node.js (funções serverless via Vercel)
-- JWT para autenticação
+- **React 18** - Biblioteca UI
+- **TypeScript** - Tipagem estática
+- **Vite** - Build tool e dev server
+- **Recharts** - Gráficos e visualizações
+- **Lucide React** - Ícones modernos
+- **LocalStorage** - Persistência de dados local
 
-### Infraestrutura
-- Vercel para deploy (Frontend)
-- Supabase para banco e backend
-- GitHub Actions para CI/CD
+## 📁 Estrutura do Projeto
 
-## Roadmap de Desenvolvimento
+```
+gym-manager/
+├── src/
+│   ├── Admin/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── index.html
+│   │   ├── components/
+│   │   │   ├── Modal.tsx
+│   │   │   └── Toast.tsx
+│   │   ├── context/
+│   │   │   └── AppContext.tsx
+│   │   ├── pages/
+│   │   │   ├── Checkin.tsx
+│   │   │   └── ... (outras páginas do Admin)
+│   │   ├── services/
+│   │   │   └── ... (serviços específicos do Admin)
+│   │   └── styles/
+│   │       └── ... 
+│   │
+│   ├── LandingPage/
+│   │   ├── pages/
+│   │   │   └── LandingPage.tsx
+│   │   ├── hooks/
+│   │   │   ├── useScrolled.tsx
+│   │   │   └── useToast.tsx
+│   │   ├── services/
+│   │   │   ├── auth.service.ts
+│   │   │   └── storage.service.ts
+│   │   ├── styles/
+│   │   │   └── global.css
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   └── utils/
+│   │       ├── constants.ts
+│   │       └── validation.ts
+│   │
+│   ├── athlete-dashboard.tsx
+│   ├── App.tsx
+│   ├── LandingPage.tsx
+│   └── main.tsx
+│
+├── README.md
 
-### MVP
-- [x] Setup inicial do projeto
-- [ ] Autenticação básica
-- [x] CRUD de alunos
-- [x] Dashboard com KPIs
-- [x] Check-in simples
+```
 
-### Fase 2
-- [ ] Sistema financeiro completo
-- [x] Agendamento de aulas
-- [ ] Notificações
+## 🛠️ Instalação
 
-### Fase 3
-- [ ] App mobile (React Native)
-- [x] Relatórios avançados
-- [x] Gamificação
+1. **Clone o repositório**
+```bash
+git clone https://github.com/seu-usuario/gym-manager.git
+cd gym-manager
+```
 
-## Como Contribuir
+2. **Instale as dependências**
+```bash
+npm install
+# ou
+yarn install
+# ou
+pnpm install
+```
 
-1. Faça fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+3. **Inicie o servidor de desenvolvimento**
+```bash
+npm run dev
+# ou
+yarn dev
+# ou
+pnpm dev
+```
+
+4. **Acesse no navegador**
+```
+http://localhost:3000
+```
+
+## 📦 Build para Produção
+
+```bash
+npm run build
+# ou
+yarn build
+# ou
+pnpm build
+```
+
+Os arquivos otimizados estarão em `dist/`
+
+## 🎯 Funcionalidades Detalhadas
+
+### Dashboard
+- Cards com métricas principais (total de alunos, ativos, receita, check-ins)
+- Gráfico de evolução de membros (últimos 6 meses)
+- Gráfico de check-ins (últimos 7 dias)
+- Feed de atividades recentes
+- Alertas de inadimplência
+
+### Gestão de Alunos
+- Cadastro completo (nome, email, telefone, CPF, data nascimento)
+- Busca por nome, email ou telefone
+- Filtros por status (ativo, inativo, inadimplente)
+- Paginação inteligente
+- Edição inline de dados
+- Exportação para CSV
+- Status visual (badges coloridos)
+
+### Agenda de Aulas
+- Calendário semanal interativo
+- Cadastro de aulas com horário e instrutor
+- Controle de capacidade e inscritos
+- Edição e exclusão de aulas
+- Visualização por dia da semana
+
+### Check-in
+- Busca rápida de aluno por nome, email ou ID
+- Confirmação de check-in com um clique
+- Validação de status do aluno
+- Alerta para inadimplentes
+- Histórico dos últimos check-ins
+- Opção de desfazer check-in
+
+### Financeiro
+- Listagem de todos os pagamentos
+- Filtros por status (pago, pendente, vencido)
+- Filtros por período (data inicial/final)
+- Cards com totalizadores
+- Confirmação rápida de pagamento
+- Indicadores visuais de status
+
+### Relatórios
+- Taxa de retenção por coorte
+- Gráfico de horários de pico
+- Distribuição de aulas por instrutor
+- Análises de tendências
+
+### Configurações
+- Visualização de planos disponíveis
+- Exportação completa de dados (backup JSON)
+- Limpeza de dados do sistema
+
+## 💾 Persistência de Dados
+
+Os dados são armazenados localmente usando **LocalStorage**:
+
+- ✅ Persistência automática entre sessões
+- ✅ Cache em memória para performance
+- ✅ Backup/restore via JSON
+- ✅ 50 alunos de demonstração ao iniciar
+
+### Estrutura de Dados
+
+```typescript
+// Students
+interface Student {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  cpf: string;
+  birthDate: string;
+  joinDate: string;
+  plan: string;
+  monthlyFee: number;
+  status: 'active' | 'inactive';
+  paymentStatus: 'up-to-date' | 'overdue';
+  lastCheckin: string;
+  notes: string;
+}
+
+// Classes
+interface ClassSchedule {
+  id: number;
+  name: string;
+  instructor: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  capacity: number;
+  enrolled: number;
+  description: string;
+}
+
+// Payments
+interface Payment {
+  id: number;
+  studentId: number;
+  amount: number;
+  date: string;
+  method: string;
+  status: 'paid' | 'pending' | 'overdue';
+  description: string;
+}
+
+// Checkins
+interface Checkin {
+  id: number;
+  studentId: number;
+  timestamp: string;
+}
+```
+
+## 🎨 Personalização
+
+### Cores
+Edite `src/styles/global.css` para alterar o esquema de cores:
+
+```css
+/* Cores principais */
+--primary: #6366f1;
+--success: #10b981;
+--danger: #ef4444;
+--warning: #f59e0b;
+```
+
+## 🔒 Segurança
+
+- Validação de formulários
+- Confirmação para ações destrutivas
+- Sanitização de entradas
+- Prevenção de XSS
+
+## 📱 Responsividade
+
+- **Desktop**: Layout completo com sidebar fixa
+- **Tablet**: Ajuste de grids (4 colunas → 2 colunas)
+- **Mobile**: Menu colapsável, layout single-column
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/NovaFuncionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
 5. Abra um Pull Request
 
-## Padrões de Código
+## 📄 Licença
 
-### Commits
-
-feat: adiciona nova funcionalidade
-fix: corrige bug
-docs: atualiza documentação
-style: formata código
-refactor: reorganiza código
-test: adiciona testes
-chore: atualiza dependências
-
-### Branch Naming
-- `feature/nome-da-feature`
-- `fix/descricao-do-bug`
-- `docs/descricao-da-doc`
-
-## Status do Projeto
-
-- MVP: Em desenvolvimento
-- Frontend: React TypeScript
-- Backend: Supabase
-- Deploy: Vercel (em breve)
-
-## Licença
-GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-
-## Contato
-Para dúvidas: criar uma Issue no repositório
+Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
-**Última atualização**: [17/10/2025]
-**Mantido por**: Pedro Henrique Forner; Iran Moreira Freitas; Gabriel Mendonça do Patrocinio; Rodrigo Cunha

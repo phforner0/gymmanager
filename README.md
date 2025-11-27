@@ -258,6 +258,48 @@ Edite `src/styles/global.css` para alterar o esquema de cores:
 4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
 5. Abra um Pull Request
 
+## 🏃‍♂️ Sprints
+
+Abaixo estão os **Sprints** planejados para o projeto. Cada sprint tem objetivo, issues incluídos e critérios de aceitação.
+
+---
+
+### Sprint 01
+**Objetivo:** Finalizar work in progress e revisar/aceitar autenticação e redirecionamento para permitir deploy estável.  
+**Issues atribuídos:** `#8`, `#14`, `#1`, `#17`
+
+**Critérios de aceitação (por issue):**
+- **#8 — Interface de busca para check-in**
+  - Busca retorna lista paginada / filtrada por nome/CPF.
+  - UI mostra estado de loading e mensagem quando não há resultados.
+  - Teste manual OK em navegadores suportados.
+- **#1 — Autenticação com Supabase (revisão)**
+  - PR revisado e aprovado; fluxo de login/logout testado.
+- **#17 — Validar redirecionamento pós-login**
+  - Login redireciona `user` → `/athlete-dashboard`.
+  - Evidências de teste anexadas à issue.
+
+**Checklist do sprint**
+- [ ] Mover issues para a coluna In progress no Project
+- [ ] Entregar e fechar issues até o fim do sprint
+
+---
+
+### Sprint 02 — *Features & Refactor*
+**Período:** 2025-12-15 → 2025-12-28  
+**Objetivo:** Entregar autenticação real, testes automatizados, KPIs do dashboard, refatorar componentes compartilhados e proteger rotas.  
+**Issues atribuídos:** `#13`, `#12`, `#7`, `#15`, `#16`
+
+**Critérios de aceitação (por issue):**
+- **#7 — Dashboard com KPIs principais**
+  - KPIs (receita, check-ins diários, novos alunos) visíveis e atualizados.
+- **#15 — Refatorar componentes compartilhados**
+  - `Modal` e `Toast` movidos para `src/shared/components` e imports atualizados.
+- **#16 — PrivateRoute / proteção de rotas**
+  - Guards implementados para rotas admin e athlete; testes manuais OK.
+
+---
+
 ## 📄 Licença
 
 Veja o arquivo `LICENSE` para mais detalhes.

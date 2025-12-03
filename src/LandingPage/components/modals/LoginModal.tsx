@@ -1,4 +1,4 @@
-﻿/* src/LandingPage/components/modals/LoginModal.tsx */
+﻿/* gymmanager/src/LandingPage/components/modals/LoginModal.tsx */
 import React, { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Modal } from '../common/Modal';

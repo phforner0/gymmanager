@@ -243,7 +243,7 @@ const StudentModal: React.FC<{
     birthDate: '',
     plan: 'Mensal',
     monthlyFee: 120,
-    status: 'active' as const,
+    status: 'active' as 'active' | 'inactive',
     notes: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});

@@ -22,11 +22,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [toasts, setToasts] = useState<ToastType[]>([]);
 
   useEffect(() => {
-    const loadData = () => {
-      const storedStudents = storage.get<Student[]>('students');
-      const storedClasses = storage.get<ClassSchedule[]>('classes');
-      const storedPayments = storage.get<Payment[]>('payments');
-      const storedCheckins = storage.get<Checkin[]>('checkins');
+    const loadData = async () => {
+      const storedStudents = await storage.get<Student[]>('students');
+      const storedClasses = await  storage.get<ClassSchedule[]>('classes');
+      const storedPayments = await  storage.get<Payment[]>('payments');
+      const storedCheckins = await storage.get<Checkin[]>('checkins');
 
       if (!storedStudents || storedStudents.length === 0) {
         const mockData = generateMockData();

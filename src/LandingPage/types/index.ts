@@ -1,8 +1,8 @@
 ﻿// gymmanager/src/LandingPage/types/index.ts
 // ============ USER TYPES ============
 export interface User {
-  id?: string; // ✅ ADICIONADO - necessário para Supabase
-  name?: string; // ✅ ADICIONADO
+  id: string; // ✅ Remova o "?"
+  name?: string;
   email: string;
   role: 'admin' | 'user';
 }

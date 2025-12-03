@@ -176,17 +176,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const addStudent = useCallback(async (student: Omit<Student, 'id' | 'joinDate' | 'lastCheckin'>) => {
     try {
-      console.log('➕ Adding new student:', student.email);
+      // 🔥 FIX: Garantir que o email e CPF estejam limpos
+      const cleanEmail = student.email.trim();
+      const cleanCpf = student.cpf.trim();
       
-      // 1. Gerar senha inicial baseada no CPF
-      const initialPassword = authService.generateInitialPassword(student.cpf);
+      console.log('➕ Adding new student:', cleanEmail);
+      
+      // 1. Gerar senha inicial baseada no CPF LIMPO
+      const initialPassword = authService.generateInitialPassword(cleanCpf);
       console.log(`🔑 Senha inicial gerada: ${initialPassword}`);
 
-      // 2. Criar usuário na tabela users
+      // 2. Criar usuário usando o email LIMPO
       const userId = await authService.createUser(
-        student.email,
+        cleanEmail,
         initialPassword,
-        student.name,
+        student.name.trim(),
         'user'
       );
 
@@ -218,6 +222,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // 4. Criar student
       const newStudent: Student = {
         ...student,
+        email: cleanEmail,
+        cpf: cleanCpf,
         id: Date.now(),
         joinDate: new Date().toISOString().split('T')[0],
         lastCheckin: new Date().toISOString(),

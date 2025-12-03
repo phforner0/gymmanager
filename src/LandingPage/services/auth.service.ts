@@ -8,13 +8,14 @@ export class AuthService {
    */
   async authenticate(email: string, password: string): Promise<User | null> {
     try {
-      console.log('🔐 Tentando autenticar:', email);
+      // 🔥 FIX: Adicione .trim() aqui também por segurança
+      const cleanEmail = email.trim().toLowerCase();
+      console.log('🔐 Tentando autenticar:', cleanEmail);
 
-      // Buscar usuário na tabela users
       const { data: users, error: userError } = await supabase
         .from('users')
         .select('id, email, name, role, password_hash')
-        .eq('email', email.toLowerCase())
+        .eq('email', cleanEmail) // 🔥 Usar cleanEmail
         .limit(1);
 
       if (userError) {
@@ -85,13 +86,16 @@ export class AuthService {
   async createUser(email: string, password: string, name: string, role: 'admin' | 'user' = 'user'): Promise<string | null> {
     try {
       const passwordHash = await this.hashPassword(password);
+      
+      // 🔥 FIX: Adicione .trim() aqui
+      const cleanEmail = email.trim().toLowerCase();
 
       const { data, error } = await supabase
         .from('users')
         .insert({
-          email: email.toLowerCase(),
+          email: cleanEmail, // 🔥 Usar cleanEmail
           password_hash: passwordHash,
-          name,
+          name: name.trim(), // É bom limpar o nome também
           role
         })
         .select('id')

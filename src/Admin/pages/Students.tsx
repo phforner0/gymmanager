@@ -286,8 +286,17 @@ const StudentModal: React.FC<{
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      console.log('🔍 Submitting form data:', formData); // 🔥 DEBUG
-      onSave(formData);
+      // 🔥 FIX: Limpar os dados antes de enviar
+      const cleanData = {
+        ...formData,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        cpf: formData.cpf.trim(),
+        phone: formData.phone.trim()
+      };
+      
+      console.log('🔍 Submitting form data:', cleanData);
+      onSave(cleanData);
     }
   };
 

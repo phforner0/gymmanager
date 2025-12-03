@@ -1,0 +1,35 @@
+-- BEGIN DDL --
+
+CREATE SCHEMA IF NOT EXISTS public;
+
+CREATE TABLE public.users ( id uuid DEFAULT extensions.uuid_generate_v4(), email text UNIQUE, password_hash text, name text, role text CHECK (role = ANY (ARRAY['admin'::text, 'user'::text])), created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.profiles ( id uuid DEFAULT extensions.uuid_generate_v4(), user_id uuid, plan text DEFAULT 'Mensal'::text, expires date, level integer DEFAULT 1, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.students ( id integer DEFAULT nextval('students_id_seq'::regclass), name text, email text UNIQUE, phone text, cpf text UNIQUE, birth_date date, join_date date DEFAULT CURRENT_DATE, plan text, monthly_fee numeric, status text DEFAULT 'active'::text CHECK (status = ANY (ARRAY['active'::text, 'inactive'::text])), payment_status text DEFAULT 'pending'::text CHECK (payment_status = ANY (ARRAY['paid'::text, 'pending'::text, 'overdue'::text])), last_checkin timestamptz, notes text, photo text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.classes ( id integer DEFAULT nextval('classes_id_seq'::regclass), name text, instructor text, day_of_week integer CHECK (day_of_week >= 0 AND day_of_week <= 6), start_time time, end_time time, capacity integer DEFAULT 20, enrolled integer DEFAULT 0, description text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.payments ( id integer DEFAULT nextval('payments_id_seq'::regclass), student_id integer, amount numeric, date date, method text, status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['paid'::text, 'pending'::text, 'overdue'::text])), description text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.checkins ( id integer DEFAULT nextval('checkins_id_seq'::regclass), student_id integer, timestamp timestamptz DEFAULT now(), created_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.workouts ( id text, user_id uuid, name text, day text, category text, exercises jsonb DEFAULT '[]'::jsonb, tags jsonb DEFAULT '[]'::jsonb, completed boolean DEFAULT false, completed_dates jsonb DEFAULT '[]'::jsonb, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.measurements ( id uuid DEFAULT extensions.uuid_generate_v4(), user_id uuid, date bigint, weight numeric, height numeric, chest numeric, waist numeric, arm numeric, thigh numeric, notes text, created_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.achievements ( id text, user_id uuid, name text, icon text, unlocked boolean DEFAULT false, date bigint, created_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.goals ( id text, user_id uuid, type text CHECK (type = ANY (ARRAY['weight'::text, 'workouts'::text, 'streak'::text, 'measurements'::text])), target numeric, current numeric DEFAULT 0, deadline bigint, title text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.timer_sessions ( id text, user_id uuid, name text, duration integer, start_time bigint, end_time bigint, created_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.user_stats ( id uuid DEFAULT extensions.uuid_generate_v4(), user_id uuid UNIQUE, volume integer DEFAULT 0, streak integer DEFAULT 0, notes text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+CREATE TABLE public.visits ( id text, name text, email text, phone text, date text, time text, created_at timestamptz DEFAULT now(), PRIMARY KEY (id) );
+
+-- Foreign key constraints ALTER TABLE public.profiles ADD CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.workouts ADD CONSTRAINT workouts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.measurements ADD CONSTRAINT measurements_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.achievements ADD CONSTRAINT achievements_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.goals ADD CONSTRAINT goals_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.timer_sessions ADD CONSTRAINT timer_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id); ALTER TABLE public.user_stats ADD CONSTRAINT user_stats_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+ALTER TABLE public.payments ADD CONSTRAINT payments_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id); ALTER TABLE public.checkins ADD CONSTRAINT checkins_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id);
+
+-- END DDL --

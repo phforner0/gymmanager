@@ -162,20 +162,53 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   const addStudent = useCallback(async (student: Omit<Student, 'id' | 'joinDate' | 'lastCheckin'>) => {
-    const newStudent: Student = {
-      ...student,
-      id: Date.now(),
-      joinDate: new Date().toISOString().split('T')[0],
-      lastCheckin: new Date().toISOString(),
-      paymentStatus: student.paymentStatus || 'pending'
-    };
-    const updated = [...students, newStudent];
-    setStudents(updated);
-    await storage.set('students', updated);
-    
-    // Recarregar para obter ID do banco
-    const reloaded = await storage.get<Student[]>('students');
-    if (reloaded) setStudents(reloaded);
+    try {
+      console.log('➕ Adding new student...');
+      
+      const newStudent: Student = {
+        ...student,
+        id: Date.now(),
+        joinDate: new Date().toISOString().split('T')[0],
+        lastCheckin: new Date().toISOString(),
+        paymentStatus: student.paymentStatus || 'pending'
+      };
+      
+      const updated = [...students, newStudent];
+      setStudents(updated);
+      await storage.set('students', updated);
+      
+      // Recarregar para obter ID do banco
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const reloaded = await storage.get<Student[]>('students');
+      if (reloaded) {
+        setStudents(reloaded);
+        
+        // 🔥 NOVO: Encontrar o aluno recém-inserido
+        const insertedStudent = reloaded.find(s => 
+          s.email.toLowerCase() === newStudent.email.toLowerCase()
+        );
+        
+        if (insertedStudent) {
+          console.log('✅ Student inserted with DB ID:', insertedStudent.id);
+          
+          // 🔥 CRIAR PAGAMENTO INICIAL AUTOMÁTICO
+          const initialPayment: Omit<Payment, 'id'> = {
+            studentId: insertedStudent.id,
+            amount: insertedStudent.monthlyFee,
+            date: new Date().toISOString().split('T')[0],
+            method: 'Pendente',
+            status: 'pending',
+            description: 'Primeira mensalidade'
+          };
+          
+          console.log('💰 Creating initial payment:', initialPayment);
+          await addPayment(initialPayment);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error adding student:', error);
+      throw error;
+    }
   }, [students]);
 
   const updateStudent = useCallback(async (id: number, data: Partial<Student>) => {

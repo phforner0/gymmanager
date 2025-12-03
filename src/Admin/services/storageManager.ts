@@ -223,12 +223,20 @@ class StorageManager {
       const toUpdate: any[] = [];
 
       for (const item of data) {
+        // 🔥 NORMALIZAR payment_status ANTES de converter para snake_case
+        if (tableName === 'students' && item.paymentStatus) {
+          const normalized = normalizePaymentStatus(item.paymentStatus);
+          console.log(`🔄 PRE-NORMALIZE: ${item.paymentStatus} -> ${normalized}`);
+          item.paymentStatus = normalized;
+        }
+
         const snakeItem = toSnakeCase(tableName, item);
 
-        // 🔥 VALIDAÇÃO ADICIONAL: Garantir que payment_status está correto
-        if (tableName === 'students' && snakeItem.payment_status) {
-          snakeItem.payment_status = normalizePaymentStatus(snakeItem.payment_status);
-          console.log(`🔄 Normalized payment_status: ${item.paymentStatus} -> ${snakeItem.payment_status}`);
+        // 🔥 VALIDAÇÃO ADICIONAL: Garantir que payment_status está correto após conversão
+        if (tableName === 'students') {
+          const finalStatus = normalizePaymentStatus(snakeItem.payment_status || 'pending');
+          console.log(`🔄 FINAL payment_status: ${snakeItem.payment_status} -> ${finalStatus}`);
+          snakeItem.payment_status = finalStatus;
         }
 
         if (

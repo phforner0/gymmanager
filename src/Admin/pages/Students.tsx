@@ -244,13 +244,17 @@ const StudentModal: React.FC<{
     plan: 'Mensal',
     monthlyFee: 120,
     status: 'active' as 'active' | 'inactive',
+    paymentStatus: 'pending' as 'paid' | 'pending' | 'overdue', // 🔥 ADICIONADO
     notes: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (student) {
-      setFormData(student);
+      setFormData({
+        ...student,
+        paymentStatus: student.paymentStatus || 'pending' // 🔥 GARANTIR VALOR VÁLIDO
+      });
     } else {
       setFormData({
         name: '',
@@ -261,6 +265,7 @@ const StudentModal: React.FC<{
         plan: 'Mensal',
         monthlyFee: 120,
         status: 'active',
+        paymentStatus: 'pending', // 🔥 VALOR PADRÃO
         notes: ''
       });
     }
@@ -281,6 +286,7 @@ const StudentModal: React.FC<{
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
+      console.log('🔍 Submitting form data:', formData); // 🔥 DEBUG
       onSave(formData);
     }
   };
@@ -387,16 +393,32 @@ const StudentModal: React.FC<{
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="label">Status</label>
-          <select
-            className="input"
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
-          >
-            <option value="active">Ativo</option>
-            <option value="inactive">Inativo</option>
-          </select>
+        <div className="grid grid-cols-2">
+          <div className="form-group">
+            <label className="label">Status</label>
+            <select
+              className="input"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
+            >
+              <option value="active">Ativo</option>
+              <option value="inactive">Inativo</option>
+            </select>
+          </div>
+
+          {/* 🔥 NOVO CAMPO: Status de Pagamento */}
+          <div className="form-group">
+            <label className="label">Status de Pagamento</label>
+            <select
+              className="input"
+              value={formData.paymentStatus}
+              onChange={(e) => setFormData({ ...formData, paymentStatus: e.target.value as 'paid' | 'pending' | 'overdue' })}
+            >
+              <option value="paid">Pago</option>
+              <option value="pending">Pendente</option>
+              <option value="overdue">Atrasado</option>
+            </select>
+          </div>
         </div>
 
         <div className="form-group">

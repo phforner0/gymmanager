@@ -161,8 +161,8 @@ class StorageManager {
        // selecionar colunas de acordo com a tabela para evitar "column ... does not exist"
     const selectColumns =
       tableName === 'students' ? 'id, email' :
-      tableName === 'checkins' || tableName === 'payments' ? 'id, student_id' :
-      'id';
+      (tableName === 'checkins' || tableName === 'payments') ? 'id,student_id' :
+        'id';
 
     const { data: existing, error: fetchError } = await supabase
       .from(tableName)
@@ -238,7 +238,7 @@ class StorageManager {
         const { data: inserted, error: insertError } = await supabase
           .from(tableName)
           .insert(toInsert)
-          .select("id, email"); // 🔥 CRÍTICO: Selecionar IDs retornados
+          .select(selectColumns); // 🔥 CRÍTICO: Selecionar IDs retornados
 
         if (insertError) {
           console.error(

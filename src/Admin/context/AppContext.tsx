@@ -22,31 +22,71 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [toasts, setToasts] = useState<ToastType[]>([]);
 
   useEffect(() => {
-    const loadData = async () => {
-      const storedStudents = await storage.get<Student[]>('students');
-      const storedClasses = await  storage.get<ClassSchedule[]>('classes');
-      const storedPayments = await  storage.get<Payment[]>('payments');
-      const storedCheckins = await storage.get<Checkin[]>('checkins');
+    const initialize = async () => {
+      try {
+        // 🔥 PASSO 1: Tentar carregar dados existentes do Supabase
+        const studentsData = await storage.get<Student[]>('students');
+        const classesData = await storage.get<ClassSchedule[]>('classes');
+        const paymentsData = await storage.get<Payment[]>('payments');
+        const checkinsData = await storage.get<Checkin[]>('checkins');
 
-      if (!storedStudents || storedStudents.length === 0) {
-        const mockData = generateMockData();
-        setStudents(mockData.students);
-        setClasses(mockData.classes);
-        setPayments(mockData.payments);
-        setCheckins(mockData.checkins);
-        storage.set('students', mockData.students);
-        storage.set('classes', mockData.classes);
-        storage.set('payments', mockData.payments);
-        storage.set('checkins', mockData.checkins);
-      } else {
-        setStudents(storedStudents);
-        setClasses(storedClasses || []);
-        setPayments(storedPayments || []);
-        setCheckins(storedCheckins || []);
+        // 🔥 PASSO 2: Se não houver dados, gerar mock e inserir NA ORDEM CORRETA
+        if (!studentsData || studentsData.length === 0) {
+          console.log('🌱 Iniciando seed do banco de dados...');
+          
+          const mockData = generateMockData();
+          
+          // 🔥 ETAPA 1: Inserir APENAS students primeiro
+          console.log('📝 Step 1: Inserting students...');
+          await storage.set('students', mockData.students);
+          
+          // 🔥 ETAPA 2: Aguardar para garantir que students foram inseridos
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // 🔥 ETAPA 3: Mapear IDs de payments para usar os IDs do banco
+          console.log('🗺️ Step 2: Mapping payment foreign keys...');
+          const mappedPayments = await storage.mapForeignKeys('payments', mockData.payments);
+          
+          // 🔥 ETAPA 4: Mapear IDs de checkins para usar os IDs do banco
+          console.log('🗺️ Step 3: Mapping checkin foreign keys...');
+          const mappedCheckins = await storage.mapForeignKeys('checkins', mockData.checkins);
+          
+          // 🔥 ETAPA 5: Inserir classes (independente)
+          console.log('📝 Step 4: Inserting classes...');
+          await storage.set('classes', mockData.classes);
+          
+          // 🔥 ETAPA 6: Inserir payments com IDs mapeados
+          console.log('📝 Step 5: Inserting payments...');
+          await storage.set('payments', mappedPayments);
+          
+          // 🔥 ETAPA 7: Inserir checkins com IDs mapeados
+          console.log('📝 Step 6: Inserting checkins...');
+          await storage.set('checkins', mappedCheckins);
+          
+          // 🔥 DEBUG: Mostrar mapeamentos
+          storage.logMappings();
+          
+          console.log('✅ Seed completo!');
+          
+          // Carregar dados atualizados
+          setStudents(mockData.students);
+          setClasses(mockData.classes);
+          setPayments(mappedPayments);
+          setCheckins(mappedCheckins);
+        } else {
+          // Carregar dados existentes
+          setStudents(studentsData || []);
+          setClasses(classesData || []);
+          setPayments(paymentsData || []);
+          setCheckins(checkinsData || []);
+        }
+      } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        showToast('Erro ao carregar dados', 'error');
       }
     };
 
-    loadData();
+    initialize();
   }, []);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {

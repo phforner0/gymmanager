@@ -79,6 +79,8 @@ function toCamelCaseArray(tableName: string, arr: any[]): any[] {
 class StorageManager {
   private cache: Map<string, any> = new Map();
   private useSupabase: boolean = true;
+  // 🔥 NOVO: Mapa de IDs locais -> IDs do banco
+  private idMappings: Map<string, Map<number, number>> = new Map();
 
   constructor() {
     try {
@@ -131,8 +133,8 @@ class StorageManager {
         console.log(`💾 Saving to Supabase: ${key}`, value);
 
         if (Array.isArray(value) && value.length > 0) {
-          // ESTRATÉGIA: Sincronização inteligente
-          await this.syncToSupabase(key, value);
+          // 🔥 ESTRATÉGIA CORRIGIDA: Sincronização com mapeamento de IDs
+          await this.syncToSupabaseWithMapping(key, value);
         }
       }
 
@@ -143,15 +145,30 @@ class StorageManager {
     }
   }
 
-  private async syncToSupabase(tableName: string, data: any[]): Promise<void> {
+  // 🔥 NOVA FUNÇÃO: Sincronização inteligente com mapeamento de IDs
+  private async syncToSupabaseWithMapping(tableName: string, data: any[]): Promise<void> {
     try {
       // 1. Buscar IDs existentes no Supabase
-      const { data: existing } = await supabase
+      const { data: existing, error: fetchError } = await supabase
         .from(tableName)
-        .select('id');
+        .select('id, email')
+        .order('id', { ascending: true });
+
+      if (fetchError) {
+        console.error(`❌ Error fetching existing ${tableName}:`, fetchError);
+        throw fetchError;
+      }
 
       const existingIds = new Set((existing || []).map(item => item.id));
       
+      // 🔥 Para students: criar mapa email -> id do banco
+      const emailToDbId = new Map<string, number>();
+      if (tableName === 'students' && existing) {
+        existing.forEach(item => {
+          if (item.email) emailToDbId.set(item.email, item.id);
+        });
+      }
+
       // 2. Separar novos registros de atualizações
       const toInsert: any[] = [];
       const toUpdate: any[] = [];
@@ -159,25 +176,65 @@ class StorageManager {
       for (const item of data) {
         const snakeItem = toSnakeCase(tableName, item);
         
-        if (existingIds.has(item.id)) {
+        // 🔥 Para students: verificar se email já existe
+        if (tableName === 'students' && snakeItem.email && emailToDbId.has(snakeItem.email)) {
+          const dbId = emailToDbId.get(snakeItem.email)!;
+          snakeItem.id = dbId; // Usar o ID do banco
+          toUpdate.push(snakeItem);
+          
+          // 🔥 Mapear ID local -> ID do banco
+          if (!this.idMappings.has(tableName)) {
+            this.idMappings.set(tableName, new Map());
+          }
+          this.idMappings.get(tableName)!.set(item.id, dbId);
+          
+          console.log(`🔄 Mapping student: local ID ${item.id} -> DB ID ${dbId} (${snakeItem.email})`);
+        } else if (existingIds.has(item.id)) {
           toUpdate.push(snakeItem);
         } else {
-          // Remover o ID para deixar o SERIAL gerar
+          // 🔥 Remover o ID para deixar o SERIAL gerar
           const { id, ...itemWithoutId } = snakeItem;
           toInsert.push(itemWithoutId);
         }
       }
 
-      // 3. Inserir novos registros
+      // 3. Inserir novos registros e capturar IDs gerados
       if (toInsert.length > 0) {
-        const { error: insertError } = await supabase
+        const { data: inserted, error: insertError } = await supabase
           .from(tableName)
-          .insert(toInsert);
+          .insert(toInsert)
+          .select('id, email'); // 🔥 CRÍTICO: Selecionar IDs retornados
 
         if (insertError) {
           console.error(`❌ Supabase insert error [${tableName}]:`, insertError);
           throw insertError;
         }
+
+        // 🔥 Mapear IDs locais -> IDs do banco
+        if (inserted && tableName === 'students') {
+          if (!this.idMappings.has(tableName)) {
+            this.idMappings.set(tableName, new Map());
+          }
+          
+          const mapping = this.idMappings.get(tableName)!;
+          const insertedByEmail = new Map(inserted.map(item => [item.email, item.id]));
+          
+          for (let i = 0; i < toInsert.length; i++) {
+            const localItem = data.find(d => {
+              const snake = toSnakeCase(tableName, d);
+              return snake.email === toInsert[i].email;
+            });
+            
+            if (localItem && toInsert[i].email) {
+              const dbId = insertedByEmail.get(toInsert[i].email);
+              if (dbId) {
+                mapping.set(localItem.id, dbId);
+                console.log(`🆕 Mapping new student: local ID ${localItem.id} -> DB ID ${dbId} (${toInsert[i].email})`);
+              }
+            }
+          }
+        }
+
         console.log(`✅ Inserted ${toInsert.length} records into ${tableName}`);
       }
 
@@ -202,6 +259,31 @@ class StorageManager {
       console.error(`❌ Supabase sync error [${tableName}]:`, error);
       throw error;
     }
+  }
+
+  // 🔥 NOVA FUNÇÃO: Obter ID do banco a partir do ID local
+  getMappedId(tableName: string, localId: number): number {
+    const mapping = this.idMappings.get(tableName);
+    if (!mapping) return localId;
+    return mapping.get(localId) || localId;
+  }
+
+  // 🔥 NOVA FUNÇÃO: Mapear student_id em payments/checkins
+  async mapForeignKeys(tableName: string, data: any[]): Promise<any[]> {
+    if (tableName !== 'payments' && tableName !== 'checkins') {
+      return data;
+    }
+
+    const studentsMapping = this.idMappings.get('students');
+    if (!studentsMapping) {
+      console.warn(`⚠️ No student ID mappings found for ${tableName}`);
+      return data;
+    }
+
+    return data.map(item => ({
+      ...item,
+      studentId: studentsMapping.get(item.studentId) || item.studentId
+    }));
   }
 
   private isTableKey(key: string): boolean {
@@ -229,9 +311,15 @@ class StorageManager {
 
   clear(): void {
     this.cache.clear();
+    this.idMappings.clear(); // 🔥 Limpar mapeamentos também
     if (typeof window !== 'undefined') {
       localStorage.clear();
     }
+  }
+
+  // 🔥 NOVA FUNÇÃO: Debug de mapeamentos
+  logMappings(): void {
+    console.log('🗺️ ID Mappings:', Object.fromEntries(this.idMappings));
   }
 }
 

@@ -1,6 +1,4 @@
 // gymmanager/src/Admin/services/mockData.ts
-// Encontre a função generateMockData e corrija os valores de paymentStatus
-
 import { Student, Payment, Checkin, ClassSchedule } from "../types";
 
 export const generateMockData = () => {
@@ -12,15 +10,27 @@ export const generateMockData = () => {
   const lastNames = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Lima', 'Costa', 'Pereira', 'Ferreira', 'Rodrigues', 'Almeida'];
   const plans = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
   
-  // ✅ VALORES CORRETOS para paymentStatus (conforme banco)
+  // ✅ VALORES CORRETOS para paymentStatus (conforme banco CORRIGIDO)
   const paymentStatuses: Array<'paid' | 'pending' | 'overdue'> = ['paid', 'pending', 'overdue'];
   
   // ✅ VALORES CORRETOS para status
   const statuses: Array<'active' | 'inactive'> = ['active', 'inactive'];
 
+  // 🔥 NOVO: Set para garantir emails únicos
+  const usedEmails = new Set<string>();
+
   for (let i = 1; i <= 50; i++) {
     const name = `${names[Math.floor(Math.random() * names.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-    const email = `${name.toLowerCase().replace(' ', '.')}@email.com`;
+    
+    // 🔥 Garantir email único adicionando número sequencial
+    let email = `${name.toLowerCase().replace(' ', '.')}${i}@email.com`;
+    
+    // 🔥 Se ainda assim houver duplicação (improvável), adicionar timestamp
+    while (usedEmails.has(email)) {
+      email = `${name.toLowerCase().replace(' ', '.')}.${Date.now()}@email.com`;
+    }
+    usedEmails.add(email);
+
     const phone = `(11) ${90000 + Math.floor(Math.random() * 9999)}-${1000 + Math.floor(Math.random() * 8999)}`;
     const cpf = `${Math.floor(100 + Math.random() * 899)}.${Math.floor(100 + Math.random() * 899)}.${Math.floor(100 + Math.random() * 899)}-${Math.floor(10 + Math.random() * 89)}`;
     
@@ -56,13 +66,13 @@ export const generateMockData = () => {
   // Payments (apenas para primeiros 30 alunos)
   const methods = ['PIX', 'Cartão', 'Dinheiro'];
   
-  // ✅ VALORES CORRETOS para payment.status (conforme banco)
+  // ✅ VALORES CORRETOS para payment.status (conforme banco CORRIGIDO)
   const paymentStatusOptions: Array<'paid' | 'pending' | 'overdue'> = ['paid', 'pending', 'overdue'];
 
   for (let i = 1; i <= 30; i++) {
     payments.push({
       id: i,
-      studentId: i,
+      studentId: i, // 🔥 ATENÇÃO: Este ID será mapeado no AppContext
       amount: 80 + Math.floor(Math.random() * 120),
       date: `2025-${String(11 + Math.floor(Math.random() * 2)).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
       method: methods[Math.floor(Math.random() * methods.length)],
@@ -85,7 +95,7 @@ export const generateMockData = () => {
       
       checkins.push({
         id: checkinId++,
-        studentId,
+        studentId, // 🔥 ATENÇÃO: Este ID será mapeado no AppContext
         timestamp: time.toISOString()
       });
     }

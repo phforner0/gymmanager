@@ -30,6 +30,13 @@ export class AuthService {
 
       const user = users[0];
 
+      const generatedHash = await this.hashPassword(password);
+      console.log('🔍 DEBUG DE SENHA:');
+      console.log('Senha digitada:', password); // Cuidado: vai aparecer no console
+      console.log('Hash gerado (Browser):', generatedHash);
+      console.log('Hash no Banco (DB):   ', user.password_hash);
+      console.log('São iguais?', generatedHash === user.password_hash);
+
       // Verificar senha
       const passwordMatch = await this.verifyPassword(password, user.password_hash);
 
@@ -140,7 +147,7 @@ export class AuthService {
     return [
       { 
         email: 'admin@impacto.com', 
-        password: 'Admin@123', 
+        password: '123', 
         role: 'admin',
         note: 'Acesso completo ao painel administrativo'
       }

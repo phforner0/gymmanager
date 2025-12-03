@@ -158,10 +158,16 @@ class StorageManager {
       // 🔥 FIX: Apenas students tem coluna 'email'
       const selectFields = tableName === "students" ? "id, email" : "id";
 
-      const { data: existing, error: fetchError } = await supabase
-        .from(tableName)
-        .select("id, email")
-        .order("id", { ascending: true });
+       // selecionar colunas de acordo com a tabela para evitar "column ... does not exist"
+    const selectColumns =
+      tableName === 'students' ? 'id, email' :
+      tableName === 'checkins' || tableName === 'payments' ? 'id, student_id' :
+      'id';
+
+    const { data: existing, error: fetchError } = await supabase
+      .from(tableName)
+      .select(selectColumns)
+      .order('id', { ascending: true });
 
       if (fetchError) {
         console.error(`❌ Error fetching existing ${tableName}:`, fetchError);
@@ -180,14 +186,17 @@ class StorageManager {
       );
 
       // 🔥 Para students: criar mapa email -> id do banco (normalizando email)
-      const emailToDbId = new Map<string, number>();
-      if (tableName === "students") {
-        existingList.forEach((item) => {
-          if (item && item.email && item.id != null) {
-            emailToDbId.set(String(item.email).toLowerCase(), item.id);
-          }
-        });
-      }
+     const emailToDbId = new Map<string, number>();
+     if (tableName === 'students') {
+       existingList.forEach(item => {
+         if (item && (item as any).email && item.id != null) {
+           emailToDbId.set(String((item as any).email).toLowerCase(), item.id);
+         }
+       });
+     }
+
+     // 🔥 Para checkins/payments não vamos procurar "email" na tabela destino (não existe).
+     // O relacionamento será resolvido usando this.idMappings.get('students') que mapeia localId -> dbId.
 
       // 2. Separar novos registros de atualizações
       const toInsert: any[] = [];
@@ -245,40 +254,50 @@ class StorageManager {
           email?: string;
         }>;
 
-        // 🔥 Mapear IDs locais -> IDs do banco
-        if (tableName === "students") {
+        // 🔥 Mapear IDs locais -> IDs do banco para students
+        if (tableName === 'students') {
           if (!this.idMappings.has(tableName)) {
             this.idMappings.set(tableName, new Map());
           }
-
+          
           const mapping = this.idMappings.get(tableName)!;
           // normalize emails to lowercase when mapping
-          const insertedByEmail = new Map(
-            insertedList
-              .filter((it) => it.email && it.id != null)
-              .map((it) => [String(it.email).toLowerCase(), it.id as number])
+          const insertedByEmail = new Map(insertedList
+            .filter(it => (it as any).email && it.id != null)
+            .map(it => [String((it as any).email).toLowerCase(), it.id as number])
           );
-
+          
           for (let i = 0; i < toInsert.length; i++) {
-            const localItem = data.find((d) => {
+            const localItem = data.find((d: any) => {
               const snake = toSnakeCase(tableName, d);
-              return (
-                snake.email &&
-                toInsert[i].email &&
-                String(snake.email).toLowerCase() ===
-                  String(toInsert[i].email).toLowerCase()
-              );
+              return snake.email && toInsert[i].email && String(snake.email).toLowerCase() === String(toInsert[i].email).toLowerCase();
             });
-
+            
             if (localItem && toInsert[i].email) {
-              const dbId = insertedByEmail.get(
-                String(toInsert[i].email).toLowerCase()
-              );
+              const dbId = insertedByEmail.get(String(toInsert[i].email).toLowerCase());
               if (dbId) {
                 mapping.set(localItem.id, dbId);
-                console.log(
-                  `🆕 Mapping new student: local ID ${localItem.id} -> DB ID ${dbId} (${toInsert[i].email})`
-                );
+                console.log(`🆕 Mapping new student: local ID ${localItem.id} -> DB ID ${dbId} (${toInsert[i].email})`);
+              }
+            }
+          }
+        }
+
+        // 🔥 Para tabelas com FK para students (checkins, payments), mapear referências locais -> db IDs
+        if (['checkins', 'payments'].includes(tableName)) {
+          // espera-se que o payload local contenha `student_local_id` (ou similar)
+          const studentMapping = this.idMappings.get('students') ?? new Map();
+          // se `toInsert` tiver objetos com student_local_id, substitua por student_id (db)
+          for (let i = 0; i < toInsert.length; i++) {
+            const rec = toInsert[i] as any;
+            if (rec.student_local_id != null) {
+              const mapped = studentMapping.get(rec.student_local_id);
+              if (mapped == null) {
+                console.warn(`⚠️ Missing mapping for student_local_id ${rec.student_local_id} when inserting into ${tableName}`);
+                // opcional: remover/ignorar este registro ou setar student_id = null conforme sua política
+              } else {
+                rec.student_id = mapped;
+                delete rec.student_local_id;
               }
             }
           }

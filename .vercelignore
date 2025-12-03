@@ -1,0 +1,49 @@
+# Arquivos de teste
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+**/test
+**/tests
+*.test.*
+*.spec.*
+
+# Configurações de teste
+vitest.config.ts
+jest.config.js
+jest.config.ts
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Documentação
+README.md
+CHANGELOG.md
+docs/
+
+# Exemplos
+examples/
+
+# CI/CD
+.github/
+.gitlab/
+.circleci/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporários
+.DS_Store
+Thumbs.db

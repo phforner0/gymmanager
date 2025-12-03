@@ -17,5 +17,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      // Excluir arquivos de teste do build
+      external: [
+        /\.test\.[jt]sx?$/,
+        /\.spec\.[jt]sx?$/,
+        /__tests__\//,
+        /\/test\//,
+      ],
+    },
   },
 })

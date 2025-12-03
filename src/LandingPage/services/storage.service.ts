@@ -1,4 +1,5 @@
-﻿import { User, Visit } from '../types';
+﻿// gymmanager\src\LandingPage\services\storage.service.ts
+import { User, Visit } from '../types';
 
 /**
  * Storage Service - Gerencia dados em memória

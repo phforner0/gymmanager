@@ -1,4 +1,4 @@
-﻿// ============ src/test/mockData.ts ============
+﻿// ============ gymmanager\src\User\src\test\mockData.ts ============
 import { UserData, Workout, Measurement, Achievement, Goal } from '../types'
 
 export const mockWorkout: Workout = {

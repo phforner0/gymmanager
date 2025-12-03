@@ -1,3 +1,4 @@
+//C:\Games\gymmanager\src\User\src\types\index.ts
 // Profile Types
 export interface Profile {
   email: string;

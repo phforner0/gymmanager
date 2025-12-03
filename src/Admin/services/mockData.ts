@@ -1,9 +1,13 @@
+// gymmanager/src/Admin/services/mockData.ts
 import { Student, ClassSchedule, Payment, Checkin } from '../types';
 
 export const generateMockData = () => {
   const firstNames = ['Ana', 'João', 'Maria', 'Pedro', 'Julia', 'Carlos', 'Fernanda', 'Ricardo', 'Camila', 'Bruno'];
   const lastNames = ['Silva', 'Santos', 'Costa', 'Oliveira', 'Souza', 'Lima', 'Pereira', 'Ferreira', 'Rodrigues', 'Almeida'];
   const plans = ['Mensal', 'Trimestral', 'Semestral', 'Anual'];
+  
+  // ✅ Status de pagamento agora usa os valores corretos
+  const paymentStatuses: Array<'paid' | 'pending' | 'overdue'> = ['paid', 'pending', 'overdue'];
   
   const students: Student[] = [];
   for (let i = 1; i <= 50; i++) {
@@ -22,7 +26,7 @@ export const generateMockData = () => {
       plan: plans[Math.floor(Math.random() * plans.length)],
       monthlyFee: 80 + Math.floor(Math.random() * 120),
       status: Math.random() > 0.1 ? 'active' : 'inactive',
-      paymentStatus: Math.random() > 0.2 ? 'up-to-date' : 'overdue',
+      paymentStatus: paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)], // ✅ CORRIGIDO
       lastCheckin: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
       notes: '',
       photo: null

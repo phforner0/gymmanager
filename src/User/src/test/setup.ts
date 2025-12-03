@@ -1,4 +1,5 @@
-﻿import { afterEach, beforeEach, vi } from 'vitest'
+﻿//gymmanager\src\User\src\test\setup.ts
+import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom'
 

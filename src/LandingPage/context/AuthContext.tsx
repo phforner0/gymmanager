@@ -1,4 +1,4 @@
-﻿// src/LandingPage/context/AuthContext.tsx
+﻿// gymmanager/src/LandingPage/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../../lib/supabase';
 

@@ -151,6 +151,7 @@ class StorageManager {
         const camelData = toCamelCaseArray(key, data || []) as T;
         this.cache.set(key, camelData);
         console.log(`✅ Supabase get success [${key}]:`, camelData);
+        console.log(`📊 Fetched ${Array.isArray(camelData) ? camelData.length : 0} records from ${key}`);
         return camelData;
       }
 

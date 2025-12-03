@@ -1,36 +1,116 @@
 ﻿// gymmanager/src/LandingPage/services/auth.service.ts
-import { User } from '../types'; // ✅ Importar do types local
-
-const mockUsers: Array<{ id: string; name: string; email: string; password: string; role: 'admin' | 'user' }> = [
-  { id: '1', name: 'Admin Impacto', email: 'admin@impacto.com', password: 'admin123', role: 'admin' },
-  { id: '2', name: 'Usuário Teste', email: 'user@impacto.com', password: 'user123', role: 'user' }
-];
+import { supabase } from '../../lib/supabase';
+import { User } from '../types';
 
 export class AuthService {
-  authenticate(email: string, password: string): User | null {
-    const found = mockUsers.find(u => u.email === email && u.password === password);
-    if (found) {
-      console.log('📊 Analytics Event: login_success', { email: found.email, role: found.role });
-      // ✅ Retorna User completo compatível com AuthContext
-      return { 
-        id: found.id, 
-        name: found.name, 
-        email: found.email, 
-        role: found.role 
+  /**
+   * Autentica usuário via Supabase
+   */
+  async authenticate(email: string, password: string): Promise<User | null> {
+    try {
+      console.log('🔐 Tentando autenticar:', email);
+
+      // Buscar usuário na tabela users
+      const { data: users, error: userError } = await supabase
+        .from('users')
+        .select('id, email, name, role, password_hash')
+        .eq('email', email.toLowerCase())
+        .limit(1);
+
+      if (userError) {
+        console.error('❌ Erro ao buscar usuário:', userError);
+        return null;
+      }
+
+      if (!users || users.length === 0) {
+        console.log('❌ Usuário não encontrado');
+        return null;
+      }
+
+      const user = users[0];
+
+      // Verificar senha
+      const passwordMatch = await this.verifyPassword(password, user.password_hash);
+
+      if (!passwordMatch) {
+        console.log('❌ Senha incorreta');
+        return null;
+      }
+
+      console.log('✅ Login bem-sucedido:', user.email);
+
+      // Retornar User completo
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as 'admin' | 'user'
       };
+    } catch (error) {
+      console.error('❌ Erro na autenticação:', error);
+      return null;
     }
-    console.log('📊 Analytics Event: login_failed', { email });
-    return null;
   }
 
-  getMockUsers() {
-    return mockUsers.map(u => ({ 
-      id: u.id, 
-      name: u.name, 
-      email: u.email, 
-      password: u.password, 
-      role: u.role 
-    }));
+  /**
+   * Cria hash de senha usando Web Crypto API
+   */
+  async hashPassword(password: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Verifica se a senha corresponde ao hash
+   */
+  async verifyPassword(password: string, hash: string): Promise<boolean> {
+    const passwordHash = await this.hashPassword(password);
+    return passwordHash === hash;
+  }
+
+  /**
+   * Cria um novo usuário (chamado pelo Admin ao criar Student)
+   */
+  async createUser(email: string, password: string, name: string, role: 'admin' | 'user' = 'user'): Promise<string | null> {
+    try {
+      const passwordHash = await this.hashPassword(password);
+
+      const { data, error } = await supabase
+        .from('users')
+        .insert({
+          email: email.toLowerCase(),
+          password_hash: passwordHash,
+          name,
+          role
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('❌ Erro ao criar usuário:', error);
+        return null;
+      }
+
+      console.log('✅ Usuário criado:', data.id);
+      return data.id;
+    } catch (error) {
+      console.error('❌ Erro ao criar usuário:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Gera senha inicial baseada no CPF
+   */
+  generateInitialPassword(cpf: string): string {
+    // Remove caracteres não numéricos
+    const cpfNumbers = cpf.replace(/\D/g, '');
+    
+    // Senha: "Impacto" + últimos 4 dígitos do CPF
+    return `Impacto${cpfNumbers.slice(-4)}`;
   }
 
   validateEmail(email: string): boolean {

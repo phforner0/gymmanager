@@ -1,5 +1,5 @@
 // gymmanager/src/Admin/services/storageManager.ts
-import { supabase } from '../../lib/supabase';
+import { supabase } from "../../lib/supabase";
 
 // ============================================
 // MAPEAMENTO CAMELCASE <-> SNAKE_CASE
@@ -7,69 +7,69 @@ import { supabase } from '../../lib/supabase';
 
 const fieldMappings: Record<string, Record<string, string>> = {
   students: {
-    birthDate: 'birth_date',
-    joinDate: 'join_date',
-    monthlyFee: 'monthly_fee',
-    paymentStatus: 'payment_status',
-    lastCheckin: 'last_checkin',
-    birth_date: 'birthDate',
-    join_date: 'joinDate',
-    monthly_fee: 'monthlyFee',
-    payment_status: 'paymentStatus',
-    last_checkin: 'lastCheckin',
+    birthDate: "birth_date",
+    joinDate: "join_date",
+    monthlyFee: "monthly_fee",
+    paymentStatus: "payment_status",
+    lastCheckin: "last_checkin",
+    birth_date: "birthDate",
+    join_date: "joinDate",
+    monthly_fee: "monthlyFee",
+    payment_status: "paymentStatus",
+    last_checkin: "lastCheckin",
   },
   classes: {
-    dayOfWeek: 'day_of_week',
-    startTime: 'start_time',
-    endTime: 'end_time',
-    day_of_week: 'dayOfWeek',
-    start_time: 'startTime',
-    end_time: 'endTime',
+    dayOfWeek: "day_of_week",
+    startTime: "start_time",
+    endTime: "end_time",
+    day_of_week: "dayOfWeek",
+    start_time: "startTime",
+    end_time: "endTime",
   },
   payments: {
-    studentId: 'student_id',
-    student_id: 'studentId',
+    studentId: "student_id",
+    student_id: "studentId",
   },
   checkins: {
-    studentId: 'student_id',
-    student_id: 'studentId',
-  }
+    studentId: "student_id",
+    student_id: "studentId",
+  },
 };
 
 function toSnakeCase(tableName: string, obj: any): any {
-  if (!obj || typeof obj !== 'object') return obj;
-  
+  if (!obj || typeof obj !== "object") return obj;
+
   const mapping = fieldMappings[tableName] || {};
   const result: any = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     const snakeKey = mapping[key] || key;
     result[snakeKey] = value;
   }
-  
+
   return result;
 }
 
 function toCamelCase(tableName: string, obj: any): any {
-  if (!obj || typeof obj !== 'object') return obj;
-  
+  if (!obj || typeof obj !== "object") return obj;
+
   const mapping = fieldMappings[tableName] || {};
   const result: any = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = mapping[key] || key;
     result[camelKey] = value;
   }
-  
+
   return result;
 }
 
 function toSnakeCaseArray(tableName: string, arr: any[]): any[] {
-  return arr.map(item => toSnakeCase(tableName, item));
+  return arr.map((item) => toSnakeCase(tableName, item));
 }
 
 function toCamelCaseArray(tableName: string, arr: any[]): any[] {
-  return arr.map(item => toCamelCase(tableName, item));
+  return arr.map((item) => toCamelCase(tableName, item));
 }
 
 // ============================================
@@ -84,8 +84,11 @@ class StorageManager {
 
   constructor() {
     try {
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        console.warn('⚠️ Supabase não configurado, usando localStorage');
+      if (
+        !import.meta.env.VITE_SUPABASE_URL ||
+        !import.meta.env.VITE_SUPABASE_ANON_KEY
+      ) {
+        console.warn("⚠️ Supabase não configurado, usando localStorage");
         this.useSupabase = false;
       }
     } catch {
@@ -104,8 +107,8 @@ class StorageManager {
         console.log(`🔍 Fetching from Supabase: ${key}`);
         const { data, error } = await supabase
           .from(key)
-          .select('*')
-          .order('id', { ascending: true });
+          .select("*")
+          .order("id", { ascending: true });
 
         if (error) {
           console.error(`❌ Supabase get error [${key}]:`, error);
@@ -146,26 +149,43 @@ class StorageManager {
   }
 
   // 🔥 NOVA FUNÇÃO: Sincronização inteligente com mapeamento de IDs
-  private async syncToSupabaseWithMapping(tableName: string, data: any[]): Promise<void> {
+  private async syncToSupabaseWithMapping(
+    tableName: string,
+    data: any[]
+  ): Promise<void> {
     try {
       // 1. Buscar IDs existentes no Supabase
+      // 🔥 FIX: Apenas students tem coluna 'email'
+      const selectFields = tableName === "students" ? "id, email" : "id";
+
       const { data: existing, error: fetchError } = await supabase
         .from(tableName)
-        .select('id, email')
-        .order('id', { ascending: true });
+        .select("id, email")
+        .order("id", { ascending: true });
 
       if (fetchError) {
         console.error(`❌ Error fetching existing ${tableName}:`, fetchError);
         throw fetchError;
       }
 
-      const existingIds = new Set((existing || []).map(item => item.id));
-      
-      // 🔥 Para students: criar mapa email -> id do banco
+      // Narrow the type for TS: guarantee an array of minimal objects
+      const existingList = (existing || []) as Array<{
+        id?: number;
+        email?: string;
+      }>;
+
+      // Filter out items without id to avoid undefined in Set
+      const existingIds = new Set(
+        existingList.map((item) => item.id).filter(Boolean) as number[]
+      );
+
+      // 🔥 Para students: criar mapa email -> id do banco (normalizando email)
       const emailToDbId = new Map<string, number>();
-      if (tableName === 'students' && existing) {
-        existing.forEach(item => {
-          if (item.email) emailToDbId.set(item.email, item.id);
+      if (tableName === "students") {
+        existingList.forEach((item) => {
+          if (item && item.email && item.id != null) {
+            emailToDbId.set(String(item.email).toLowerCase(), item.id);
+          }
         });
       }
 
@@ -175,20 +195,26 @@ class StorageManager {
 
       for (const item of data) {
         const snakeItem = toSnakeCase(tableName, item);
-        
+
         // 🔥 Para students: verificar se email já existe
-        if (tableName === 'students' && snakeItem.email && emailToDbId.has(snakeItem.email)) {
+        if (
+          tableName === "students" &&
+          snakeItem.email &&
+          emailToDbId.has(snakeItem.email)
+        ) {
           const dbId = emailToDbId.get(snakeItem.email)!;
           snakeItem.id = dbId; // Usar o ID do banco
           toUpdate.push(snakeItem);
-          
+
           // 🔥 Mapear ID local -> ID do banco
           if (!this.idMappings.has(tableName)) {
             this.idMappings.set(tableName, new Map());
           }
           this.idMappings.get(tableName)!.set(item.id, dbId);
-          
-          console.log(`🔄 Mapping student: local ID ${item.id} -> DB ID ${dbId} (${snakeItem.email})`);
+
+          console.log(
+            `🔄 Mapping student: local ID ${item.id} -> DB ID ${dbId} (${snakeItem.email})`
+          );
         } else if (existingIds.has(item.id)) {
           toUpdate.push(snakeItem);
         } else {
@@ -203,33 +229,56 @@ class StorageManager {
         const { data: inserted, error: insertError } = await supabase
           .from(tableName)
           .insert(toInsert)
-          .select('id, email'); // 🔥 CRÍTICO: Selecionar IDs retornados
+          .select("id, email"); // 🔥 CRÍTICO: Selecionar IDs retornados
 
         if (insertError) {
-          console.error(`❌ Supabase insert error [${tableName}]:`, insertError);
+          console.error(
+            `❌ Supabase insert error [${tableName}]:`,
+            insertError
+          );
           throw insertError;
         }
 
+        // Narrow type for safety
+        const insertedList = (inserted || []) as Array<{
+          id?: number;
+          email?: string;
+        }>;
+
         // 🔥 Mapear IDs locais -> IDs do banco
-        if (inserted && tableName === 'students') {
+        if (tableName === "students") {
           if (!this.idMappings.has(tableName)) {
             this.idMappings.set(tableName, new Map());
           }
-          
+
           const mapping = this.idMappings.get(tableName)!;
-          const insertedByEmail = new Map(inserted.map(item => [item.email, item.id]));
-          
+          // normalize emails to lowercase when mapping
+          const insertedByEmail = new Map(
+            insertedList
+              .filter((it) => it.email && it.id != null)
+              .map((it) => [String(it.email).toLowerCase(), it.id as number])
+          );
+
           for (let i = 0; i < toInsert.length; i++) {
-            const localItem = data.find(d => {
+            const localItem = data.find((d) => {
               const snake = toSnakeCase(tableName, d);
-              return snake.email === toInsert[i].email;
+              return (
+                snake.email &&
+                toInsert[i].email &&
+                String(snake.email).toLowerCase() ===
+                  String(toInsert[i].email).toLowerCase()
+              );
             });
-            
+
             if (localItem && toInsert[i].email) {
-              const dbId = insertedByEmail.get(toInsert[i].email);
+              const dbId = insertedByEmail.get(
+                String(toInsert[i].email).toLowerCase()
+              );
               if (dbId) {
                 mapping.set(localItem.id, dbId);
-                console.log(`🆕 Mapping new student: local ID ${localItem.id} -> DB ID ${dbId} (${toInsert[i].email})`);
+                console.log(
+                  `🆕 Mapping new student: local ID ${localItem.id} -> DB ID ${dbId} (${toInsert[i].email})`
+                );
               }
             }
           }
@@ -243,10 +292,13 @@ class StorageManager {
         const { error: updateError } = await supabase
           .from(tableName)
           .update(item)
-          .eq('id', item.id);
+          .eq("id", item.id);
 
         if (updateError) {
-          console.error(`❌ Supabase update error [${tableName}]:`, updateError);
+          console.error(
+            `❌ Supabase update error [${tableName}]:`,
+            updateError
+          );
         }
       }
 
@@ -270,24 +322,24 @@ class StorageManager {
 
   // 🔥 NOVA FUNÇÃO: Mapear student_id em payments/checkins
   async mapForeignKeys(tableName: string, data: any[]): Promise<any[]> {
-    if (tableName !== 'payments' && tableName !== 'checkins') {
+    if (tableName !== "payments" && tableName !== "checkins") {
       return data;
     }
 
-    const studentsMapping = this.idMappings.get('students');
+    const studentsMapping = this.idMappings.get("students");
     if (!studentsMapping) {
       console.warn(`⚠️ No student ID mappings found for ${tableName}`);
       return data;
     }
 
-    return data.map(item => ({
+    return data.map((item) => ({
       ...item,
-      studentId: studentsMapping.get(item.studentId) || item.studentId
+      studentId: studentsMapping.get(item.studentId) || item.studentId,
     }));
   }
 
   private isTableKey(key: string): boolean {
-    const tables = ['students', 'classes', 'payments', 'checkins'];
+    const tables = ["students", "classes", "payments", "checkins"];
     return tables.includes(key);
   }
 
@@ -312,14 +364,14 @@ class StorageManager {
   clear(): void {
     this.cache.clear();
     this.idMappings.clear(); // 🔥 Limpar mapeamentos também
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.clear();
     }
   }
 
   // 🔥 NOVA FUNÇÃO: Debug de mapeamentos
   logMappings(): void {
-    console.log('🗺️ ID Mappings:', Object.fromEntries(this.idMappings));
+    console.log("🗺️ ID Mappings:", Object.fromEntries(this.idMappings));
   }
 }
 

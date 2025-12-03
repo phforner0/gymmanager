@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserData, Workout, Measurement, Achievement, Goal } from '../types';
 import { storage } from '../services';
 import { useToast } from '../hooks';
+import { useAuth } from '../../../LandingPage/context/AuthContext';
 
 // Layout Components
 import { Header } from '../components/layout/Header';
@@ -38,9 +40,36 @@ import { CalendarView } from '../components/calendar';
 import { AchievementsList } from '../components/achievements';
 import { AnalyticsView } from '../components/analytics';
 
+interface WorkoutFormData {
+  name: string;
+  day: string;
+  category: string;
+  exercises: string;
+  tags: string;
+}
+
+interface MeasurementFormData {
+  weight: string;
+  height: string;
+  chest: string;
+  waist: string;
+  arm: string;
+  thigh: string;
+  notes: string;
+}
+
+interface GoalFormData {
+  title: string;
+  type: 'weight' | 'workouts' | 'streak' | 'measurements';
+  target: string;
+  deadline: string;
+}
+
 function Dashboard() {
-  const userEmail = 'teste@impacto.local';
-  const [data, setData] = useState<UserData>(() => storage.getUserData(userEmail));
+  const navigate = useNavigate();
+  const { user, logout: authLogout, isLoading: authLoading } = useAuth();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [data, setData] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState('workouts');
   
   // Modal states
@@ -65,14 +94,60 @@ function Dashboard() {
   
   const { toast, showToast } = useToast();
 
-  // Save data to storage whenever it changes
+  // Verificar autenticação e carregar dados
   useEffect(() => {
-    storage.setUserData(userEmail, data);
-  }, [data]);
+    const initializeDashboard = async () => {
+      // Se ainda está carregando a autenticação, aguardar
+      if (authLoading) return;
+
+      // Se não há usuário, redirecionar para login
+      if (!user) {
+        showToast('⚠️ Você precisa fazer login');
+        navigate('/login');
+        return;
+      }
+
+      try {
+        // Ativar modo Supabase com o ID do usuário autenticado
+        storage.enableSupabase(user.id);
+        
+        // Carregar dados do usuário
+        const userData = await storage.getUserData(user.email);
+        setData(userData);
+        setIsInitialized(true);
+        
+        console.log('✅ Dashboard inicializado com Supabase para:', user.email);
+      } catch (error) {
+        console.error('❌ Erro ao inicializar dashboard:', error);
+        showToast('❌ Erro ao carregar dados');
+      }
+    };
+
+    initializeDashboard();
+  }, [user, authLoading, navigate, showToast]);
+
+  // Salvar dados quando mudarem
+  useEffect(() => {
+    const saveData = async () => {
+      if (!user || !data || !isInitialized) return;
+      
+      try {
+        await storage.setUserData(user.email, data);
+      } catch (error) {
+        console.error('❌ Erro ao salvar dados:', error);
+      }
+    };
+
+    saveData();
+  }, [data, user, isInitialized]);
 
   // Update goals automatically
   useEffect(() => {
+    if (!data) return;
+
     setData(prev => {
+      if (!prev) return prev;
+      
       const updatedGoals = prev.goals.map(goal => {
         let current = goal.current;
         
@@ -89,7 +164,7 @@ function Dashboard() {
       
       return { ...prev, goals: updatedGoals };
     });
-  }, [data.workouts, data.streak, data.measurements]);
+  }, [data?.workouts, data?.streak, data?.measurements]);
 
   // Calculate streak
   const calculateStreak = useCallback((workouts: Workout[]): number => {
@@ -97,13 +172,18 @@ function Dashboard() {
     let streak = 0;
     let checkDate = today;
     
-    while (true) {
+    // Limitar loop para evitar infinite loop
+    const MAX_DAYS = 365;
+    let daysChecked = 0;
+    
+    while (daysChecked < MAX_DAYS) {
       const hasWorkout = workouts.some(w =>
         w.completedDates?.some(d => new Date(d).setHours(0, 0, 0, 0) === checkDate)
       );
       if (!hasWorkout) break;
       streak++;
       checkDate -= 86400000;
+      daysChecked++;
     }
     return streak;
   }, []);
@@ -128,7 +208,11 @@ function Dashboard() {
 
   // Toggle workout completion
   const toggleComplete = useCallback((id: string) => {
+    if (!data) return;
+    
     setData(prev => {
+      if (!prev) return prev;
+      
       const workouts = prev.workouts.map(w => {
         if (w.id === id) {
           const completed = !w.completed;
@@ -146,12 +230,15 @@ function Dashboard() {
       
       return { ...prev, workouts, volume, streak };
     });
-  }, [calculateStreak, checkAchievements]);
+  }, [data, calculateStreak, checkAchievements]);
 
   // Save workout
-  const saveWorkout = useCallback((formData: any) => {
+  const saveWorkout = useCallback((formData: WorkoutFormData) => {
+    if (!data || !user) return;
+    
     const workout: Workout = {
       id: editingWorkout?.id || 'w' + Date.now(),
+      user_id: user.id,
       name: formData.name,
       day: formData.day,
       category: formData.category,
@@ -161,29 +248,40 @@ function Dashboard() {
       completedDates: editingWorkout?.completedDates || []
     };
 
-    setData(prev => ({
-      ...prev,
-      workouts: editingWorkout
-        ? prev.workouts.map(w => w.id === editingWorkout.id ? workout : w)
-        : [workout, ...prev.workouts]
-    }));
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        workouts: editingWorkout
+          ? prev.workouts.map(w => w.id === editingWorkout.id ? workout : w)
+          : [workout, ...prev.workouts]
+      };
+    });
 
     setShowWorkoutModal(false);
     setEditingWorkout(null);
     showToast(editingWorkout ? '✅ Treino atualizado' : '✅ Treino criado');
-  }, [editingWorkout, showToast]);
+  }, [data, user, editingWorkout, showToast]);
 
   // Delete workout
   const deleteWorkout = useCallback((id: string) => {
+    if (!data) return;
+    
     if (confirm('Remover este treino?')) {
-      setData(prev => ({ ...prev, workouts: prev.workouts.filter(w => w.id !== id) }));
+      setData(prev => {
+        if (!prev) return prev;
+        return { ...prev, workouts: prev.workouts.filter(w => w.id !== id) };
+      });
       showToast('✅ Treino removido');
     }
-  }, [showToast]);
+  }, [data, showToast]);
 
   // Save measurement
-  const saveMeasurement = useCallback((formData: any) => {
+  const saveMeasurement = useCallback((formData: MeasurementFormData) => {
+    if (!data || !user) return;
+    
     const measurement: Measurement = {
+      user_id: user.id,
       date: Date.now(),
       weight: parseFloat(formData.weight) || null,
       height: parseFloat(formData.height) || null,
@@ -194,15 +292,22 @@ function Dashboard() {
       notes: formData.notes
     };
 
-    setData(prev => ({ ...prev, measurements: [measurement, ...prev.measurements] }));
+    setData(prev => {
+      if (!prev) return prev;
+      return { ...prev, measurements: [measurement, ...prev.measurements] };
+    });
+    
     setShowMeasurementModal(false);
     showToast('✅ Medida registrada');
-  }, [showToast]);
+  }, [data, user, showToast]);
 
   // Save goal
-  const saveGoal = useCallback((formData: any) => {
+  const saveGoal = useCallback((formData: GoalFormData) => {
+    if (!data || !user) return;
+    
     const goal: Goal = {
       id: 'g' + Date.now(),
+      user_id: user.id,
       type: formData.type,
       target: parseFloat(formData.target),
       current: 0,
@@ -210,21 +315,32 @@ function Dashboard() {
       title: formData.title
     };
 
-    setData(prev => ({ ...prev, goals: [goal, ...prev.goals] }));
+    setData(prev => {
+      if (!prev) return prev;
+      return { ...prev, goals: [goal, ...prev.goals] };
+    });
+    
     setShowGoalModal(false);
     showToast('✅ Meta criada');
-  }, [showToast]);
+  }, [data, user, showToast]);
 
   // Delete goal
   const deleteGoal = useCallback((id: string) => {
+    if (!data) return;
+    
     if (confirm('Remover esta meta?')) {
-      setData(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
+      setData(prev => {
+        if (!prev) return prev;
+        return { ...prev, goals: prev.goals.filter(g => g.id !== id) };
+      });
       showToast('✅ Meta removida');
     }
-  }, [showToast]);
+  }, [data, showToast]);
 
   // Export data
   const exportData = useCallback(() => {
+    if (!data) return;
+    
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -240,8 +356,9 @@ function Dashboard() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (!file) return;
       try {
         const text = await file.text();
@@ -258,8 +375,11 @@ function Dashboard() {
 
   // Handle logout
   const handleLogout = useCallback(() => {
-    showToast('Logout simulado');
-  }, [showToast]);
+    storage.disableSupabase();
+    authLogout();
+    navigate('/login');
+    showToast('✅ Logout realizado');
+  }, [authLogout, navigate, showToast]);
 
   // Handle timer complete
   const handleTimerComplete = useCallback(() => {
@@ -287,6 +407,8 @@ function Dashboard() {
 
   // Filtered workouts
   const filteredWorkouts = useMemo(() => {
+    if (!data) return [];
+    
     let filtered = [...data.workouts];
     
     if (searchQuery) {
@@ -310,13 +432,33 @@ function Dashboard() {
     });
     
     return filtered;
-  }, [data.workouts, searchQuery, filterCategory, sortBy]);
+  }, [data, searchQuery, filterCategory, sortBy]);
 
   // Categories
   const categories = useMemo(() => {
+    if (!data) return ['all'];
     const cats = new Set(data.workouts.map(w => w.category));
     return ['all', ...Array.from(cats)];
-  }, [data.workouts]);
+  }, [data]);
+
+  // Loading state
+  if (authLoading || !isInitialized || !data) {
+    return (
+      <div className="container" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh' 
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>⏳ Carregando...</h2>
+          <p style={{ color: 'var(--muted)', marginTop: 8 }}>
+            Conectando com Supabase
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -416,13 +558,13 @@ function Dashboard() {
               <TimerCard 
                 onTimerComplete={handleTimerComplete} 
                 data={data} 
-                setData={setData} 
+                setData={setData as React.Dispatch<React.SetStateAction<UserData>>} 
               />
               <RMCalculator />
             </div>
             <NotesCard
               notes={data.notes}
-              onNotesChange={(notes: string) => setData(prev => ({ ...prev, notes }))}
+              onNotesChange={(notes: string) => setData(prev => prev ? { ...prev, notes } : prev)}
               onSave={() => showToast('✅ Notas salvas com sucesso!')}
             />
           </div>

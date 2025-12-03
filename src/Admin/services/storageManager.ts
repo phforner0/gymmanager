@@ -7,13 +7,11 @@ import { supabase } from '../../lib/supabase';
 
 const fieldMappings: Record<string, Record<string, string>> = {
   students: {
-    // camelCase -> snake_case
     birthDate: 'birth_date',
     joinDate: 'join_date',
     monthlyFee: 'monthly_fee',
     paymentStatus: 'payment_status',
     lastCheckin: 'last_checkin',
-    // snake_case -> camelCase (reverse)
     birth_date: 'birthDate',
     join_date: 'joinDate',
     monthly_fee: 'monthlyFee',
@@ -21,30 +19,23 @@ const fieldMappings: Record<string, Record<string, string>> = {
     last_checkin: 'lastCheckin',
   },
   classes: {
-    // camelCase -> snake_case
     dayOfWeek: 'day_of_week',
     startTime: 'start_time',
     endTime: 'end_time',
-    // snake_case -> camelCase
     day_of_week: 'dayOfWeek',
     start_time: 'startTime',
     end_time: 'endTime',
   },
   payments: {
-    // camelCase -> snake_case
     studentId: 'student_id',
-    // snake_case -> camelCase
     student_id: 'studentId',
   },
   checkins: {
-    // camelCase -> snake_case
     studentId: 'student_id',
-    // snake_case -> camelCase
     student_id: 'studentId',
   }
 };
 
-// Converter objeto de camelCase para snake_case
 function toSnakeCase(tableName: string, obj: any): any {
   if (!obj || typeof obj !== 'object') return obj;
   
@@ -59,7 +50,6 @@ function toSnakeCase(tableName: string, obj: any): any {
   return result;
 }
 
-// Converter objeto de snake_case para camelCase
 function toCamelCase(tableName: string, obj: any): any {
   if (!obj || typeof obj !== 'object') return obj;
   
@@ -74,7 +64,6 @@ function toCamelCase(tableName: string, obj: any): any {
   return result;
 }
 
-// Converter array de objetos
 function toSnakeCaseArray(tableName: string, arr: any[]): any[] {
   return arr.map(item => toSnakeCase(tableName, item));
 }
@@ -92,7 +81,6 @@ class StorageManager {
   private useSupabase: boolean = true;
 
   constructor() {
-    // Verificar se Supabase está configurado
     try {
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
         console.warn('⚠️ Supabase não configurado, usando localStorage');
@@ -104,7 +92,6 @@ class StorageManager {
   }
 
   async get<T>(key: string): Promise<T | null> {
-    // Verificar cache primeiro
     if (this.cache.has(key)) {
       console.log(`📦 Cache hit: ${key}`);
       return this.cache.get(key);
@@ -115,16 +102,15 @@ class StorageManager {
         console.log(`🔍 Fetching from Supabase: ${key}`);
         const { data, error } = await supabase
           .from(key)
-          .select('*');
+          .select('*')
+          .order('id', { ascending: true });
 
         if (error) {
           console.error(`❌ Supabase get error [${key}]:`, error);
           return this.getFromLocalStorage<T>(key);
         }
 
-        // Converter de snake_case para camelCase
         const camelData = toCamelCaseArray(key, data || []) as T;
-        
         this.cache.set(key, camelData);
         console.log(`✅ Supabase get success [${key}]:`, camelData);
         return camelData;
@@ -139,44 +125,82 @@ class StorageManager {
 
   async set<T>(key: string, value: T): Promise<void> {
     try {
-      // Atualizar cache
       this.cache.set(key, value);
 
       if (this.useSupabase && this.isTableKey(key)) {
         console.log(`💾 Saving to Supabase: ${key}`, value);
 
-        // 1. Deletar todos os registros antigos
-        const { error: deleteError } = await supabase
-          .from(key)
-          .delete()
-          .neq('id', 0); // Deleta todos (truque: id nunca é 0)
-
-        if (deleteError) {
-          console.error(`❌ Supabase delete error [${key}]:`, deleteError);
-        }
-
-        // 2. Inserir novos dados (convertendo para snake_case)
         if (Array.isArray(value) && value.length > 0) {
-          const snakeData = toSnakeCaseArray(key, value);
-          
-          const { error: insertError } = await supabase
-            .from(key)
-            .insert(snakeData);
-
-          if (insertError) {
-            console.error(`❌ Supabase insert error [${key}]:`, insertError);
-            throw insertError;
-          }
-
-          console.log(`✅ Supabase set success [${key}]`);
+          // ESTRATÉGIA: Sincronização inteligente
+          await this.syncToSupabase(key, value);
         }
       }
 
-      // Sempre salvar no localStorage como backup
       this.setToLocalStorage(key, value);
     } catch (error) {
       console.error(`❌ Storage set error [${key}]:`, error);
       this.setToLocalStorage(key, value);
+    }
+  }
+
+  private async syncToSupabase(tableName: string, data: any[]): Promise<void> {
+    try {
+      // 1. Buscar IDs existentes no Supabase
+      const { data: existing } = await supabase
+        .from(tableName)
+        .select('id');
+
+      const existingIds = new Set((existing || []).map(item => item.id));
+      
+      // 2. Separar novos registros de atualizações
+      const toInsert: any[] = [];
+      const toUpdate: any[] = [];
+
+      for (const item of data) {
+        const snakeItem = toSnakeCase(tableName, item);
+        
+        if (existingIds.has(item.id)) {
+          toUpdate.push(snakeItem);
+        } else {
+          // Remover o ID para deixar o SERIAL gerar
+          const { id, ...itemWithoutId } = snakeItem;
+          toInsert.push(itemWithoutId);
+        }
+      }
+
+      // 3. Inserir novos registros
+      if (toInsert.length > 0) {
+        const { error: insertError } = await supabase
+          .from(tableName)
+          .insert(toInsert);
+
+        if (insertError) {
+          console.error(`❌ Supabase insert error [${tableName}]:`, insertError);
+          throw insertError;
+        }
+        console.log(`✅ Inserted ${toInsert.length} records into ${tableName}`);
+      }
+
+      // 4. Atualizar registros existentes
+      for (const item of toUpdate) {
+        const { error: updateError } = await supabase
+          .from(tableName)
+          .update(item)
+          .eq('id', item.id);
+
+        if (updateError) {
+          console.error(`❌ Supabase update error [${tableName}]:`, updateError);
+        }
+      }
+
+      if (toUpdate.length > 0) {
+        console.log(`✅ Updated ${toUpdate.length} records in ${tableName}`);
+      }
+
+      console.log(`✅ Supabase sync success [${tableName}]`);
+    } catch (error) {
+      console.error(`❌ Supabase sync error [${tableName}]:`, error);
+      throw error;
     }
   }
 

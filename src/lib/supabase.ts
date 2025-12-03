@@ -58,7 +58,7 @@ export type Database = {
           plan: string | null;
           monthly_fee: number | null;
           status: 'active' | 'inactive';
-          payment_status: 'up-to-date' | 'overdue';
+          payment_status: 'up-to-date' | 'overdue' | 'paid' | 'pending';
           last_checkin: string | null;
           notes: string | null;
           photo: string | null;

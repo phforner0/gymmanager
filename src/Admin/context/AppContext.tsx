@@ -235,7 +235,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       await storage.set('students', updated);
       
       // Recarregar para obter ID do banco
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       const reloaded = await storage.get<Student[]>('students');
       
       if (reloaded) {

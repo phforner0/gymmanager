@@ -1,4 +1,3 @@
-//C:\Games\gymmanager\src\User\src\types\index.ts
 // Profile Types
 export interface Profile {
   email: string;
@@ -7,11 +6,13 @@ export interface Profile {
   plan: string;
   expires: string;
   level: number;
+  user_id?: string; // 🔥 ID do Supabase
 }
 
 // Workout Types
 export interface Workout {
   id: string;
+  user_id?: string; // 🔥 FK para Supabase
   name: string;
   day: string;
   category: string;
@@ -19,10 +20,14 @@ export interface Workout {
   tags: string[];
   completed: boolean;
   completedDates: number[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Measurement Types
 export interface Measurement {
+  id?: string; // 🔥 UUID do Supabase
+  user_id?: string;
   date: number;
   weight: number | null;
   height: number | null;
@@ -31,34 +36,53 @@ export interface Measurement {
   arm: number | null;
   thigh: number | null;
   notes: string;
+  created_at?: string;
 }
 
 // Achievement Types
 export interface Achievement {
   id: string;
+  user_id?: string;
   name: string;
   icon: string;
   unlocked: boolean;
   date?: number;
+  created_at?: string;
 }
 
 // Goal Types
 export interface Goal {
   id: string;
+  user_id?: string;
   type: 'weight' | 'workouts' | 'streak' | 'measurements';
   target: number;
   current: number;
   deadline: number;
   title: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Timer Types
 export interface TimerSession {
   id: string;
+  user_id?: string;
   name: string;
   duration: number;
   startTime: number;
   endTime?: number;
+  created_at?: string;
+}
+
+// User Stats Types
+export interface UserStats {
+  id?: string;
+  user_id: string;
+  volume: number;
+  streak: number;
+  notes: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // User Data Types

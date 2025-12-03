@@ -17,8 +17,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false, // Desabilitar sourcemaps em produção para reduzir tamanho
-    minify: 'terser',
+    sourcemap: false,
+    minify: 'esbuild', // Mudado de terser para esbuild (mais rápido)
+    target: 'es2020', // Target compatível
     rollupOptions: {
       output: {
         manualChunks: {
@@ -26,17 +27,26 @@ export default defineConfig({
           'lucide': ['lucide-react'],
           'supabase': ['@supabase/supabase-js']
         },
-        // Garantir nomes consistentes de assets
-        assetFileNames: 'assets/[name].[hash][extname]',
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js',
-      }
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      },
     },
-    // Aumentar limite de aviso de chunk size
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2000, // Aumentado
+    cssCodeSplit: true,
+    reportCompressedSize: false, // Desabilitar para build mais rápido
+    emptyOutDir: true,
   },
-  // Otimizações de dependências
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', '@supabase/supabase-js']
-  }
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router-dom', 
+      'lucide-react', 
+      '@supabase/supabase-js'
+    ],
+    exclude: ['@testing-library/user-event'],
+  },
+  // Prevenir erros de MIME type
+  assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf'],
 })

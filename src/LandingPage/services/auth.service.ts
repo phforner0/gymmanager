@@ -37,7 +37,14 @@ export class AuthService {
         return null;
       }
 
+      // Verificar se usuário está ativo
+      if (user.role === 'inactive') {
+        console.log('❌ Usuário inativo');
+        return null;
+      }
+
       console.log('✅ Login bem-sucedido:', user.email);
+      console.log('📊 Analytics Event: login_success', { email: user.email, role: user.role });
 
       // Retornar User completo
       return {
@@ -48,6 +55,7 @@ export class AuthService {
       };
     } catch (error) {
       console.error('❌ Erro na autenticação:', error);
+      console.log('📊 Analytics Event: login_failed', { email });
       return null;
     }
   }
@@ -119,6 +127,20 @@ export class AuthService {
 
   getRedirectPath(role?: string): string {
     return role === 'admin' ? '/admin' : '/user';
+  }
+
+  /**
+   * Obter usuários mock para ajuda durante desenvolvimento
+   */
+  getMockUsers() {
+    return [
+      { 
+        email: 'admin@impacto.com', 
+        password: 'Admin@123', 
+        role: 'admin',
+        note: 'Acesso completo ao painel administrativo'
+      }
+    ];
   }
 }
 

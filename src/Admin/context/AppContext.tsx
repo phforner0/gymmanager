@@ -1,12 +1,20 @@
 // gymmanager/src/Admin/context/AppContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Student, ClassSchedule, Payment, Checkin, AppContextType, ToastType } from '../types';
 import { storage } from '../services/storageManager';
 import { generateMockData } from '../services/mockData';
-import { supabase } from '../../lib/supabase';
+import { Toast } from '../components/Toast';
 import { authService } from '../../LandingPage/services/auth.service';
+import { supabase } from '../../lib/supabase';
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | null>(null);
+
+export const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) throw new Error('useApp must be used within AppProvider');
+  return context;
+};
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -16,108 +24,174 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [toasts, setToasts] = useState<ToastType[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Carregar dados do storage
   useEffect(() => {
-    const loadData = async () => {
+    const initialize = async () => {
       try {
-        console.log('📊 Carregando dados do storage...');
+        console.log('🚀 Initializing AppContext...');
         
-        const [loadedStudents, loadedClasses, loadedPayments, loadedCheckins] = await Promise.all([
-          storage.get<Student[]>('students'),
-          storage.get<ClassSchedule[]>('classes'),
-          storage.get<Payment[]>('payments'),
-          storage.get<Checkin[]>('checkins')
-        ]);
+        const studentsData = await storage.get<Student[]>('students');
+        const classesData = await storage.get<ClassSchedule[]>('classes');
+        const paymentsData = await storage.get<Payment[]>('payments');
+        const checkinsData = await storage.get<Checkin[]>('checkins');
 
-        if (!loadedStudents || loadedStudents.length === 0) {
-          console.log('⚙️ Gerando dados mock iniciais...');
+        console.log('📊 Data loaded:', {
+          students: studentsData?.length || 0,
+          classes: classesData?.length || 0,
+          payments: paymentsData?.length || 0,
+          checkins: checkinsData?.length || 0
+        });
+
+        if (!studentsData || studentsData.length === 0) {
+          console.log('🌱 No existing data found. Starting database seed...');
+          
+          console.log('🗑️ Cleaning database before seed...');
+          await storage.clearDatabase();
+          
           const mockData = generateMockData();
-          
-          setStudents(mockData.students);
-          setClasses(mockData.classes);
-          setPayments(mockData.payments);
-          setCheckins(mockData.checkins);
-          
-          await Promise.all([
-            storage.set('students', mockData.students),
-            storage.set('classes', mockData.classes),
-            storage.set('payments', mockData.payments),
-            storage.set('checkins', mockData.checkins)
-          ]);
-          
-          showToast('Dados iniciais carregados', 'success');
-        } else {
-          setStudents(loadedStudents);
-          setClasses(loadedClasses || []);
-          setPayments(loadedPayments || []);
-          setCheckins(loadedCheckins || []);
-          
-          console.log('✅ Dados carregados:', {
-            students: loadedStudents.length,
-            classes: loadedClasses?.length || 0,
-            payments: loadedPayments?.length || 0,
-            checkins: loadedCheckins?.length || 0
+          console.log('📦 Mock data generated:', {
+            students: mockData.students.length,
+            classes: mockData.classes.length,
+            payments: mockData.payments.length,
+            checkins: mockData.checkins.length
           });
+          
+          console.log('📝 Step 1: Inserting students...');
+          await storage.set('students', mockData.students);
+          
+          console.log('⏳ Waiting for students to be fully inserted...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          console.log('🔄 Reloading students from database...');
+          const insertedStudents = await storage.get<Student[]>('students');
+          
+          if (!insertedStudents || insertedStudents.length === 0) {
+            throw new Error('❌ CRITICAL: Students were not inserted! Check database permissions.');
+          }
+          
+          console.log('✅ Students inserted successfully:', insertedStudents.length);
+          console.log('🆔 First 5 student IDs from DB:', insertedStudents.slice(0, 5).map(s => ({ id: s.id, email: s.email })));
+          
+          const emailToDbId = new Map<string, number>();
+          insertedStudents.forEach(s => {
+            emailToDbId.set(s.email.toLowerCase(), s.id);
+          });
+          
+          console.log('🗺️ Email to DB ID mapping created:', emailToDbId.size, 'entries');
+          
+          console.log('📝 Step 2: Mapping payments...');
+          const mappedPayments = mockData.payments.map(payment => {
+            const mockStudent = mockData.students.find(s => s.id === payment.studentId);
+            if (!mockStudent) {
+              console.error(`❌ Mock student not found for payment studentId ${payment.studentId}`);
+              return null;
+            }
+            
+            const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
+            if (!dbStudentId) {
+              console.error(`❌ DB student ID not found for email ${mockStudent.email}`);
+              return null;
+            }
+            
+            console.log(`🔗 Payment mapped: mock ${payment.studentId} (${mockStudent.email}) -> DB ${dbStudentId}`);
+            return { ...payment, studentId: dbStudentId };
+          }).filter(Boolean) as Payment[];
+          
+          console.log(`✅ ${mappedPayments.length}/${mockData.payments.length} payments successfully mapped`);
+          
+          if (mappedPayments.length > 0) {
+            console.log('💾 Inserting payments...');
+            await storage.set('payments', mappedPayments);
+          }
+          
+          console.log('📝 Step 3: Mapping checkins...');
+          const mappedCheckins = mockData.checkins.map(checkin => {
+            const mockStudent = mockData.students.find(s => s.id === checkin.studentId);
+            if (!mockStudent) return null;
+            
+            const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
+            if (!dbStudentId) return null;
+            
+            return { ...checkin, studentId: dbStudentId };
+          }).filter(Boolean) as Checkin[];
+          
+          console.log(`✅ ${mappedCheckins.length}/${mockData.checkins.length} checkins successfully mapped`);
+          
+          if (mappedCheckins.length > 0) {
+            console.log('💾 Inserting checkins...');
+            await storage.set('checkins', mappedCheckins);
+          }
+          
+          console.log('📝 Step 4: Inserting classes...');
+          await storage.set('classes', mockData.classes);
+          
+          console.log('⏳ Waiting for final sync...');
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          const finalStudents = await storage.get<Student[]>('students');
+          const finalPayments = await storage.get<Payment[]>('payments');
+          const finalCheckins = await storage.get<Checkin[]>('checkins');
+          const finalClasses = await storage.get<ClassSchedule[]>('classes');
+          
+          console.log('✅ Final data loaded:', {
+            students: finalStudents?.length || 0,
+            payments: finalPayments?.length || 0,
+            checkins: finalCheckins?.length || 0,
+            classes: finalClasses?.length || 0
+          });
+          
+          setStudents(finalStudents || []);
+          setPayments(finalPayments || []);
+          setCheckins(finalCheckins || []);
+          setClasses(finalClasses || []);
+          
+          console.log('🎉 Seed complete!');
+        } else {
+          console.log('📂 Loading existing data...');
+          setStudents(studentsData || []);
+          setClasses(classesData || []);
+          setPayments(paymentsData || []);
+          setCheckins(checkinsData || []);
+          
+          console.log('✅ Existing data loaded');
         }
-
+        
         setIsInitialized(true);
       } catch (error) {
-        console.error('❌ Erro ao carregar dados:', error);
+        console.error('❌ Erro na inicialização:', error);
         showToast('Erro ao carregar dados', 'error');
+        setIsInitialized(true);
       }
     };
 
-    loadData();
+    initialize();
   }, []);
 
-  // Salvar dados quando mudarem
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const saveData = async () => {
-      try {
-        await Promise.all([
-          storage.set('students', students),
-          storage.set('classes', classes),
-          storage.set('payments', payments),
-          storage.set('checkins', checkins)
-        ]);
-        console.log('💾 Dados salvos no storage');
-      } catch (error) {
-        console.error('❌ Erro ao salvar dados:', error);
-      }
-    };
-
-    saveData();
-  }, [students, classes, payments, checkins, isInitialized]);
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000);
-  };
+    }, 4000); // 4 segundos para dar tempo de ler a senha
+  }, []);
 
-  // ============ STUDENTS ============
-  const addStudent = async (studentData: Omit<Student, 'id' | 'joinDate' | 'lastCheckin'>) => {
+  const addStudent = useCallback(async (student: Omit<Student, 'id' | 'joinDate' | 'lastCheckin'>) => {
     try {
-      console.log('➕ Adicionando aluno:', studentData);
-
+      console.log('➕ Adding new student:', student.email);
+      
       // 1. Gerar senha inicial baseada no CPF
-      const initialPassword = authService.generateInitialPassword(studentData.cpf);
+      const initialPassword = authService.generateInitialPassword(student.cpf);
       console.log(`🔑 Senha inicial gerada: ${initialPassword}`);
 
       // 2. Criar usuário na tabela users
       const userId = await authService.createUser(
-        studentData.email,
+        student.email,
         initialPassword,
-        studentData.name,
+        student.name,
         'user'
       );
 
       if (!userId) {
-        throw new Error('Falha ao criar usuário');
+        throw new Error('Falha ao criar usuário no sistema de autenticação');
       }
 
       console.log(`✅ Usuário criado com ID: ${userId}`);
@@ -127,48 +201,82 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         .from('profiles')
         .insert({
           user_id: userId,
-          plan: studentData.plan,
+          plan: student.plan,
           expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           level: 1
         });
 
       if (profileError) {
         console.error('❌ Erro ao criar perfil:', profileError);
-        throw profileError;
+        // Tentar limpar o usuário criado
+        await supabase.from('users').delete().eq('id', userId);
+        throw new Error('Erro ao criar perfil do aluno');
       }
 
+      console.log('✅ Perfil criado no Supabase');
+      
       // 4. Criar student
       const newStudent: Student = {
-        ...studentData,
+        ...student,
         id: Date.now(),
         joinDate: new Date().toISOString().split('T')[0],
         lastCheckin: new Date().toISOString(),
-        paymentStatus: studentData.paymentStatus || 'pending'
+        paymentStatus: student.paymentStatus || 'pending'
       };
-
-      setStudents(prev => [...prev, newStudent]);
       
+      const updated = [...students, newStudent];
+      setStudents(updated);
+      await storage.set('students', updated);
+      
+      // Recarregar para obter ID do banco
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const reloaded = await storage.get<Student[]>('students');
+      
+      if (reloaded) {
+        setStudents(reloaded);
+        
+        const insertedStudent = reloaded.find(s => 
+          s.email.toLowerCase() === newStudent.email.toLowerCase()
+        );
+        
+        if (insertedStudent) {
+          console.log('✅ Student inserted with DB ID:', insertedStudent.id);
+          
+          // Criar pagamento inicial automático
+          const initialPayment: Omit<Payment, 'id'> = {
+            studentId: insertedStudent.id,
+            amount: insertedStudent.monthlyFee,
+            date: new Date().toISOString().split('T')[0],
+            method: 'Pendente',
+            status: 'pending',
+            description: 'Primeira mensalidade'
+          };
+          
+          console.log('💰 Creating initial payment:', initialPayment);
+          await addPayment(initialPayment);
+        }
+      }
+      
+      // Toast com credenciais - IMPORTANTE!
       showToast(
-        `✅ Aluno criado! Login: ${studentData.email} | Senha: ${initialPassword}`,
+        `✅ Aluno cadastrado!\n📧 Login: ${student.email}\n🔑 Senha: ${initialPassword}\n\nInforme essas credenciais ao aluno.`,
         'success'
       );
-
+      
       console.log('✅ Aluno adicionado com sucesso');
     } catch (error) {
-      console.error('❌ Erro ao adicionar aluno:', error);
-      showToast('Erro ao adicionar aluno', 'error');
+      console.error('❌ Error adding student:', error);
+      showToast(`Erro ao adicionar aluno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`, 'error');
       throw error;
     }
-  };
+  }, [students]);
 
-  const updateStudent = async (id: number, data: Partial<Student>) => {
+  const updateStudent = useCallback(async (id: number, data: Partial<Student>) => {
     try {
-      console.log('📝 Atualizando aluno:', id, data);
-
-      setStudents(prev =>
-        prev.map(s => (s.id === id ? { ...s, ...data } : s))
-      );
-
+      const updated = students.map(s => s.id === id ? { ...s, ...data } : s);
+      setStudents(updated);
+      await storage.set('students', updated);
+      
       // Se o email foi alterado, atualizar também na tabela users
       if (data.email) {
         const student = students.find(s => s.id === id);
@@ -183,214 +291,156 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           }
         }
       }
-
-      console.log('✅ Aluno atualizado');
     } catch (error) {
-      console.error('❌ Erro ao atualizar aluno:', error);
-      showToast('Erro ao atualizar aluno', 'error');
+      console.error('❌ Error updating student:', error);
       throw error;
     }
-  };
+  }, [students]);
 
-  const deleteStudent = async (id: number) => {
+  const deleteStudent = useCallback(async (id: number) => {
     try {
-      console.log('🗑️ Arquivando aluno:', id);
-
       const student = students.find(s => s.id === id);
-      if (!student) {
-        throw new Error('Aluno não encontrado');
-      }
-
+      
       // Marcar como inativo ao invés de deletar
-      setStudents(prev =>
-        prev.map(s => (s.id === id ? { ...s, status: 'inactive' } : s))
-      );
-
-      // Opcionalmente, também desativar o usuário
-      await supabase
-        .from('users')
-        .update({ role: 'inactive' })
-        .eq('email', student.email.toLowerCase());
-
-      console.log('✅ Aluno arquivado');
-    } catch (error) {
-      console.error('❌ Erro ao arquivar aluno:', error);
-      showToast('Erro ao arquivar aluno', 'error');
-      throw error;
-    }
-  };
-
-  // ============ CLASSES ============
-  const addClass = async (classData: Omit<ClassSchedule, 'id'>) => {
-    try {
-      const newClass: ClassSchedule = {
-        ...classData,
-        id: Date.now()
-      };
-      setClasses(prev => [...prev, newClass]);
-      console.log('✅ Aula adicionada');
-    } catch (error) {
-      console.error('❌ Erro ao adicionar aula:', error);
-      throw error;
-    }
-  };
-
-  const updateClass = async (id: number, data: Partial<ClassSchedule>) => {
-    try {
-      setClasses(prev =>
-        prev.map(c => (c.id === id ? { ...c, ...data } : c))
-      );
-      console.log('✅ Aula atualizada');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar aula:', error);
-      throw error;
-    }
-  };
-
-  const deleteClass = async (id: number) => {
-    try {
-      setClasses(prev => prev.filter(c => c.id !== id));
-      console.log('✅ Aula removida');
-    } catch (error) {
-      console.error('❌ Erro ao remover aula:', error);
-      throw error;
-    }
-  };
-
-  // ============ PAYMENTS ============
-  const addPayment = async (paymentData: Omit<Payment, 'id'>) => {
-    try {
-      const newPayment: Payment = {
-        ...paymentData,
-        id: Date.now()
-      };
-      setPayments(prev => [...prev, newPayment]);
+      const updated = students.map(s => s.id === id ? { ...s, status: 'inactive' as const } : s);
+      setStudents(updated);
+      await storage.set('students', updated);
       
-      // Atualizar status de pagamento do aluno
-      if (paymentData.status === 'paid') {
-        setStudents(prev =>
-          prev.map(s =>
-            s.id === paymentData.studentId
-              ? { ...s, paymentStatus: 'paid' }
-              : s
-          )
-        );
+      // Também desativar o usuário
+      if (student) {
+        await supabase
+          .from('users')
+          .update({ role: 'inactive' })
+          .eq('email', student.email.toLowerCase());
       }
-      
-      console.log('✅ Pagamento adicionado');
     } catch (error) {
-      console.error('❌ Erro ao adicionar pagamento:', error);
+      console.error('❌ Error deleting student:', error);
       throw error;
     }
-  };
+  }, [students]);
 
-  const updatePayment = async (id: number, data: Partial<Payment>) => {
-    try {
-      setPayments(prev =>
-        prev.map(p => (p.id === id ? { ...p, ...data } : p))
+  const addClass = useCallback(async (cls: Omit<ClassSchedule, 'id'>) => {
+    const newClass: ClassSchedule = { ...cls, id: Date.now() };
+    const updated = [...classes, newClass];
+    setClasses(updated);
+    await storage.set('classes', updated);
+  }, [classes]);
+
+  const updateClass = useCallback(async (id: number, data: Partial<ClassSchedule>) => {
+    const updated = classes.map(c => c.id === id ? { ...c, ...data } : c);
+    setClasses(updated);
+    await storage.set('classes', updated);
+  }, [classes]);
+
+  const deleteClass = useCallback(async (id: number) => {
+    const updated = classes.filter(c => c.id !== id);
+    setClasses(updated);
+    await storage.set('classes', updated);
+  }, [classes]);
+
+  const addPayment = useCallback(async (payment: Omit<Payment, 'id'>) => {
+    const newPayment: Payment = { ...payment, id: Date.now() };
+    const updated = [...payments, newPayment];
+    setPayments(updated);
+    await storage.set('payments', updated);
+    
+    const reloaded = await storage.get<Payment[]>('payments');
+    if (reloaded) {
+      console.log('🔄 Payments reloaded after add:', reloaded.length);
+      setPayments(reloaded);
+    }
+    
+    // Atualizar status de pagamento do aluno se necessário
+    if (payment.status === 'paid') {
+      const updatedStudents = students.map(s =>
+        s.id === payment.studentId ? { ...s, paymentStatus: 'paid' as const } : s
       );
-      console.log('✅ Pagamento atualizado');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar pagamento:', error);
-      throw error;
+      setStudents(updatedStudents);
+      await storage.set('students', updatedStudents);
     }
+  }, [payments, students]);
+
+  const updatePayment = useCallback(async (id: number, data: Partial<Payment>) => {
+    console.log('📝 Updating payment:', id, data);
+    const updated = payments.map(p => p.id === id ? { ...p, ...data } : p);
+    setPayments(updated);
+    await storage.set('payments', updated);
+    
+    const reloaded = await storage.get<Payment[]>('payments');
+    if (reloaded) {
+      console.log('🔄 Payments reloaded after update:', reloaded.length);
+      setPayments(reloaded);
+    }
+  }, [payments]);
+
+  const addCheckin = useCallback(async (studentId: number) => {
+    const newCheckin: Checkin = {
+      id: Date.now(),
+      studentId,
+      timestamp: new Date().toISOString()
+    };
+    const updated = [...checkins, newCheckin];
+    setCheckins(updated);
+    await storage.set('checkins', updated);
+    
+    const updatedStudents = students.map(s => 
+      s.id === studentId ? { ...s, lastCheckin: newCheckin.timestamp } : s
+    );
+    setStudents(updatedStudents);
+    await storage.set('students', updatedStudents);
+  }, [checkins, students]);
+
+  const removeCheckin = useCallback(async (id: number) => {
+    const updated = checkins.filter(c => c.id !== id);
+    setCheckins(updated);
+    await storage.set('checkins', updated);
+  }, [checkins]);
+
+  const value: AppContextType = {
+    students,
+    classes,
+    payments,
+    checkins,
+    addStudent,
+    updateStudent,
+    deleteStudent,
+    addClass,
+    updateClass,
+    deleteClass,
+    addPayment,
+    updatePayment,
+    addCheckin,
+    removeCheckin,
+    showToast
   };
 
-  // ============ CHECKINS ============
-  const addCheckin = async (studentId: number) => {
-    try {
-      const newCheckin: Checkin = {
-        id: Date.now(),
-        studentId,
-        timestamp: new Date().toISOString()
-      };
-      setCheckins(prev => [newCheckin, ...prev]);
-      
-      // Atualizar lastCheckin do aluno
-      setStudents(prev =>
-        prev.map(s =>
-          s.id === studentId
-            ? { ...s, lastCheckin: newCheckin.timestamp }
-            : s
-        )
-      );
-      
-      console.log('✅ Check-in registrado');
-    } catch (error) {
-      console.error('❌ Erro ao registrar check-in:', error);
-      throw error;
-    }
-  };
-
-  const removeCheckin = async (id: number) => {
-    try {
-      setCheckins(prev => prev.filter(c => c.id !== id));
-      console.log('✅ Check-in removido');
-    } catch (error) {
-      console.error('❌ Erro ao remover check-in:', error);
-      throw error;
-    }
-  };
+  if (!isInitialized) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
+        <div style={{ 
+          width: '40px', 
+          height: '40px', 
+          border: '4px solid #e5e7eb', 
+          borderTopColor: '#3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }} />
+        <div style={{ color: '#6b7280' }}>Carregando dados...</div>
+      </div>
+    );
+  }
 
   return (
-    <AppContext.Provider
-      value={{
-        students,
-        classes,
-        payments,
-        checkins,
-        addStudent,
-        updateStudent,
-        deleteStudent,
-        addClass,
-        updateClass,
-        deleteClass,
-        addPayment,
-        updatePayment,
-        addCheckin,
-        removeCheckin,
-        showToast
-      }}
-    >
+    <AppContext.Provider value={value}>
       {children}
-      
-      {/* Toast Container */}
-      <div style={{
-        position: 'fixed',
-        top: 20,
-        right: 20,
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10
-      }}>
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            style={{
-              padding: '12px 20px',
-              borderRadius: 8,
-              background: toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#3b82f6',
-              color: 'white',
-              fontWeight: 500,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              animation: 'slideIn 0.3s ease-out',
-              minWidth: 300,
-              maxWidth: 500
-            }}
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
+      <Toast toasts={toasts} />
     </AppContext.Provider>
   );
-};
-
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within AppProvider');
-  }
-  return context;
 };

@@ -1,17 +1,45 @@
-﻿// gymmanager/src/LandingPage/pages/Login.tsx
-import React, { useState } from 'react';
+﻿/* gymmanager/src/LandingPage/components/modals/LoginModal.tsx */
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Modal } from '../common/Modal';
+import { Button } from '../common/Button';
+import { authService } from '../../services/auth.service';
+import type { User } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { authService } from '../../services/auth.service';
-import { TestCredentials } from './TestCredentials'; // 🧪 REMOVER EM PRODUÇÃO
 
-export const Login: React.FC = () => {
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: (user: User) => void;
+  showToast?: (message: string, type: 'success' | 'error' | 'info') => void;
+}
+
+export const LoginModal: React.FC<LoginModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  showToast
+}) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setEmail('');
+      setPassword('');
+      setRemember(false);
+      setError('');
+      setShowPassword(false);
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,206 +47,232 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Validar campos
-      if (!email || !password) {
+      console.log('📊 Analytics Event: login_attempt', { email: email.trim() });
+
+      // Validações básicas
+      if (!email.trim() || !password) {
         setError('Preencha todos os campos');
+        setLoading(false);
         return;
       }
 
-      if (!authService.validateEmail(email)) {
+      if (!authService.validateEmail(email.trim())) {
         setError('Email inválido');
+        setLoading(false);
         return;
       }
 
-      // Autenticar
-      const user = await authService.authenticate(email, password);
+      // Autenticar via Supabase
+      const user = await authService.authenticate(email.trim(), password);
 
       if (!user) {
-        setError('Email ou senha incorretos');
+        setError('E-mail ou senha incorretos');
+        showToast?.('E-mail ou senha incorretos', 'error');
+        setLoading(false);
         return;
       }
 
       // Login bem-sucedido
-      login(user);
+      console.log('✅ Login realizado:', user.email, user.role);
       
-      // Redirecionar baseado no role
-      const redirectPath = authService.getRedirectPath(user.role);
-      navigate(redirectPath);
+      // Usar callback se fornecido, senão fazer login direto
+      if (onSuccess) {
+        onSuccess(user);
+      } else {
+        login(user);
+      }
+
+      showToast?.(`Bem-vindo, ${user.name}!`, 'success');
+
+      // Fechar modal e redirecionar
+      onClose();
+      
+      setTimeout(() => {
+        const path = authService.getRedirectPath(user.role);
+        showToast?.('Redirecionando...', 'info');
+        navigate(path);
+      }, 300);
+
     } catch (err) {
-      console.error('Erro no login:', err);
+      console.error('❌ Erro no login:', err);
       setError('Erro ao fazer login. Tente novamente.');
+      showToast?.('Erro ao fazer login', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // Credenciais de exemplo
+  const mockUsers = authService.getMockUsers();
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: 20
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: 16,
-        padding: 40,
-        width: '100%',
-        maxWidth: 400,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-      }}>
-        {/* Logo */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 32
-        }}>
-          <h1 style={{
-            fontSize: 32,
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: 8
-          }}>
-            Impacto Gym
-          </h1>
-          <p style={{
-            color: '#6b7280',
-            fontSize: 14
-          }}>
-            Faça login para continuar
-          </p>
+    <Modal isOpen={isOpen} onClose={onClose} title="Entrar na sua conta">
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div
+            className="alert alert-error"
+            role="alert"
+            style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}
+          >
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="login-email">E-mail</label>
+          <input
+            type="email"
+            id="login-email"
+            className="form-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            required
+            autoFocus
+            disabled={loading}
+          />
         </div>
 
-        {/* Formulário */}
-        <form onSubmit={handleSubmit}>
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              background: '#fee2e2',
-              border: '1px solid #fecaca',
-              borderRadius: 8,
-              padding: 12,
-              marginBottom: 20,
-              color: '#dc2626',
-              fontSize: 14
-            }}>
-              {error}
-            </div>
-          )}
-
-          {/* Email */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{
-              display: 'block',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#374151',
-              marginBottom: 8
-            }}>
-              Email
-            </label>
+        <div className="form-group">
+          <label className="form-label" htmlFor="login-password">Senha</label>
+          <div style={{ position: 'relative' }}>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '2px solid #e5e7eb',
-                borderRadius: 8,
-                fontSize: 14,
-                transition: 'border-color 0.2s',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#667eea'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-          </div>
-
-          {/* Password */}
-          <div style={{ marginBottom: 24 }}>
-            <label style={{
-              display: 'block',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#374151',
-              marginBottom: 8
-            }}>
-              Senha
-            </label>
-            <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
+              id="login-password"
+              className="form-input"
+              style={{ paddingRight: 40 }}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              required
               disabled={loading}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '2px solid #e5e7eb',
-                borderRadius: 8,
-                fontSize: 14,
-                transition: 'border-color 0.2s',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#667eea'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#6b7280',
+                padding: 4
+              }}
+              disabled={loading}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+        </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px 24px',
-              background: loading ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 16,
-              fontWeight: 700,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-            }}
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div style={{
-          marginTop: 24,
-          textAlign: 'center',
-          fontSize: 12,
-          color: '#9ca3af'
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '20px' 
         }}>
-          <p>Não tem acesso?</p>
-          <p style={{ marginTop: 4 }}>
-            Entre em contato com o administrador
-          </p>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            cursor: 'pointer' 
+          }}>
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              disabled={loading}
+            />
+            <span style={{ fontSize: '0.9rem' }}>Lembrar-me</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => showToast?.(
+              'Entre em contato com o administrador para recuperar sua senha', 
+              'info'
+            )}
+            style={{ 
+              fontSize: '0.9rem', 
+              color: 'var(--accent)', 
+              cursor: 'pointer', 
+              background: 'transparent', 
+              border: 'none' 
+            }}
+            disabled={loading}
+          >
+            Esqueci a senha
+          </button>
+        </div>
+
+        <Button type="submit" variant="primary" fullWidth disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar'}
+        </Button>
+      </form>
+
+      {/* Credenciais de Teste */}
+      <div style={{ 
+        marginTop: '24px', 
+        padding: '16px', 
+        background: 'var(--glass)', 
+        borderRadius: '8px', 
+        fontSize: '0.85rem', 
+        color: 'var(--muted)' 
+      }}>
+        <div style={{ 
+          fontWeight: 700, 
+          marginBottom: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8
+        }}>
+          🧪 Credenciais de Teste
+        </div>
+        
+        {mockUsers.map((user, idx) => (
+          <div key={idx} style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: 2 }}>
+              {user.note}
+            </div>
+            <div>
+              <strong>Email:</strong> {user.email}<br />
+              <strong>Senha:</strong> {user.password}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail(user.email);
+                setPassword(user.password);
+              }}
+              style={{
+                marginTop: 4,
+                padding: '4px 8px',
+                fontSize: '0.75rem',
+                background: 'var(--accent)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            >
+              Usar estas credenciais
+            </button>
+          </div>
+        ))}
+        
+        <div style={{ 
+          marginTop: 12, 
+          paddingTop: 12, 
+          borderTop: '1px solid rgba(0,0,0,0.1)',
+          fontSize: '0.75rem'
+        }}>
+          <strong>💡 Para Alunos:</strong><br />
+          Após o cadastro pelo admin, use seu email e a senha inicial fornecida (formato: Impacto + últimos 4 dígitos do CPF)
         </div>
       </div>
-
-      {/* 🧪 COMPONENTE DE TESTE - REMOVER EM PRODUÇÃO */}
-      {import.meta.env.DEV && <TestCredentials />}
-    </div>
+    </Modal>
   );
 };

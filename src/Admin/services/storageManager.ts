@@ -260,8 +260,7 @@ class StorageManager {
         } else if (existingIds.has(item.id)) {
           toUpdate.push(snakeItem);
         } else {
-          const { id, ...itemWithoutId } = snakeItem;
-          toInsert.push(itemWithoutId);
+          toInsert.push(snakeItem);
         }
       }
 

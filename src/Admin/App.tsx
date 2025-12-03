@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Activity, Menu, X } from 'lucide-react';
 import { Home, Users, Calendar, Activity as ActivityIcon, CreditCard, BarChart3, Settings } from 'lucide-react';
 import { AppProvider } from './context/AppContext';
@@ -12,30 +13,23 @@ import { SettingsView } from './pages/Settings';
 import './styles/global.css';
 
 export default function GymManagerApp() {
-  const [currentView, setCurrentView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'students', label: 'Alunos', icon: Users },
-    { id: 'classes', label: 'Agenda de Aulas', icon: Calendar },
-    { id: 'checkin', label: 'Check-in', icon: ActivityIcon },
-    { id: 'payments', label: 'Financeiro', icon: CreditCard },
-    { id: 'reports', label: 'Relatórios', icon: BarChart3 },
-    { id: 'settings', label: 'Configurações', icon: Settings },
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/admin' },
+    { id: 'students', label: 'Alunos', icon: Users, path: '/admin/students' },
+    { id: 'classes', label: 'Agenda de Aulas', icon: Calendar, path: '/admin/classes' },
+    { id: 'checkin', label: 'Check-in', icon: ActivityIcon, path: '/admin/checkin' },
+    { id: 'payments', label: 'Financeiro', icon: CreditCard, path: '/admin/payments' },
+    { id: 'reports', label: 'Relatórios', icon: BarChart3, path: '/admin/reports' },
+    { id: 'settings', label: 'Configurações', icon: Settings, path: '/admin/settings' },
   ];
 
-  const renderView = () => {
-    switch (currentView) {
-      case 'dashboard': return <Dashboard />;
-      case 'students': return <Students />;
-      case 'classes': return <Classes />;
-      case 'checkin': return <Checkin />;
-      case 'payments': return <Payments />;
-      case 'reports': return <Reports />;
-      case 'settings': return <SettingsView />;
-      default: return <Dashboard />;
-    }
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setSidebarOpen(false);
   };
 
   return (
@@ -52,11 +46,8 @@ export default function GymManagerApp() {
             {navigationItems.map(item => (
               <button
                 key={item.id}
-                className={`nav-item ${currentView === item.id ? 'active' : ''}`}
-                onClick={() => {
-                  setCurrentView(item.id);
-                  setSidebarOpen(false);
-                }}
+                className={`nav-item ${location.pathname === item.path || (item.path === '/admin' && location.pathname === '/admin') ? 'active' : ''}`}
+                onClick={() => handleNavigation(item.path)}
               >
                 <item.icon size={20} />
                 {item.label}
@@ -75,7 +66,16 @@ export default function GymManagerApp() {
             </div>
           </div>
           <div className="page-content">
-            {renderView()}
+            <Routes>
+              <Route index element={<Dashboard />} />
+              <Route path="students" element={<Students />} />
+              <Route path="classes" element={<Classes />} />
+              <Route path="checkin" element={<Checkin />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<SettingsView />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
           </div>
         </main>
       </div>

@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   getRedirectPath(role?: string): string {
-    return role === 'admin' ? '/admin' : '/athlete-dashboard';
+    return role === 'admin' ? '/admin' : '/user';
   }
 }
 

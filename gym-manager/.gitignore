@@ -36,6 +36,7 @@ public/
 .env.test.local
 .env.production.local
 .env.*.backup
+.vercel
 
 # Logs
 logs/

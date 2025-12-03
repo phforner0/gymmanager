@@ -4,7 +4,7 @@ import { AuthProvider } from './LandingPage/context/AuthContext';
 import LandingPage from './LandingPage/App';
 
 const AdminApp = lazy(() => import('./Admin/App'));
-const AthleteApp = lazy(() => import('./athlete-dashboard'));
+const UserApp = lazy(() => import('./User/src/App'));
 
 export default function App() {
   return (
@@ -12,7 +12,7 @@ export default function App() {
       <Suspense fallback={<div>Carregando...</div>}>
         <Routes>
           <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/athlete-dashboard" element={<AthleteApp />} />
+          <Route path="/user/*" element={<UserApp />} />
           <Route path="/*" element={<LandingPage />} />
         </Routes>
       </Suspense>

@@ -2,7 +2,7 @@
 // ============ USER TYPES ============
 export interface User {
   id: string; // ✅ Remova o "?"
-  name?: string;
+  name: string;
   email: string;
   role: 'admin' | 'user';
 }

@@ -256,9 +256,17 @@ class StorageManager {
 
         // 🔥 Mapear IDs locais -> IDs do banco para students
         if (tableName === 'students') {
-          if (!this.idMappings.has(tableName)) {
-            this.idMappings.set(tableName, new Map());
-          }
+        // normalize payment_status para o conjunto aceito pelo banco
+        const allowed = new Set(['paid', 'pending', 'overdue']);
+        const normalize = (val: any) => {
+          if (!val && val !== 0) return undefined;
+          const s = String(val).toLowerCase();
+          if (allowed.has(s)) return s;
+          // mapear valores alternativos
+          if (s === 'up-to-date' || s === 'up to date' || s === 'uptodate') return 'paid';
+          // se for algo inesperado, retornar undefined para usar o default do DB (ou 'pending' se preferir)
+          return undefined;
+        };
           
           const mapping = this.idMappings.get(tableName)!;
           // normalize emails to lowercase when mapping

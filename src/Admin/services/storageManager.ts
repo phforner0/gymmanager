@@ -415,6 +415,38 @@ class StorageManager {
   logMappings(): void {
     console.log("🗺️ ID Mappings:", Object.fromEntries(this.idMappings));
   }
+
+  async clearDatabase(): Promise<void> {
+    if (!this.useSupabase) {
+      console.warn("⚠️ Supabase não configurado, limpando apenas localStorage");
+      this.clear();
+      return;
+    }
+
+    try {
+      console.log("🗑️ Clearing database tables...");
+      
+      // Deletar na ordem correta (filhos primeiro, pais depois)
+      const tables = ['checkins', 'payments', 'classes', 'students'];
+      
+      for (const table of tables) {
+        const { error } = await supabase.from(table).delete().neq('id', 0);
+        
+        if (error) {
+          console.error(`❌ Error clearing ${table}:`, error);
+        } else {
+          console.log(`✅ Cleared table: ${table}`);
+        }
+      }
+      
+      this.cache.clear();
+      this.idMappings.clear();
+      console.log("✅ Database cleared successfully");
+    } catch (error) {
+      console.error("❌ Error clearing database:", error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new StorageManager();

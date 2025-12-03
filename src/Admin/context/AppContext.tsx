@@ -44,6 +44,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         if (!studentsData || studentsData.length === 0) {
           console.log('🌱 No existing data found. Starting database seed...');
           
+          // 🔥 IMPORTANTE: Limpar banco para evitar conflitos de foreign key
+          console.log('🗑️ Cleaning database before seed...');
+          await storage.clearDatabase();
+          
           const mockData = generateMockData();
           console.log('📦 Mock data generated:', {
             students: mockData.students.length,
@@ -57,61 +61,93 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           await storage.set('students', mockData.students);
           
           // 🔥 ETAPA 2: Aguardar para garantir que students foram inseridos
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          console.log('⏳ Waiting for students to be fully inserted...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
           
-          // 🔥 ETAPA 3: Recarregar students para obter IDs do banco
+          // 🔥 ETAPA 3: Recarregar students para obter IDs REAIS do banco
+          console.log('🔄 Reloading students from database...');
           const insertedStudents = await storage.get<Student[]>('students');
-          console.log('✅ Students inserted:', insertedStudents?.length);
+          
+          if (!insertedStudents || insertedStudents.length === 0) {
+            throw new Error('❌ CRITICAL: Students were not inserted! Check database permissions.');
+          }
+          
+          console.log('✅ Students inserted successfully:', insertedStudents.length);
+          console.log('🆔 First 5 student IDs from DB:', insertedStudents.slice(0, 5).map(s => ({ id: s.id, email: s.email })));
           
           // 🔥 ETAPA 4: Criar mapeamento de emails para IDs do banco
           const emailToDbId = new Map<string, number>();
-          if (insertedStudents) {
-            insertedStudents.forEach(s => {
-              emailToDbId.set(s.email.toLowerCase(), s.id);
-            });
-          }
+          insertedStudents.forEach(s => {
+            emailToDbId.set(s.email.toLowerCase(), s.id);
+          });
+          
           console.log('🗺️ Email to DB ID mapping created:', emailToDbId.size, 'entries');
+          console.log('📋 First 5 mappings:', 
+            Array.from(emailToDbId.entries()).slice(0, 5).map(([email, id]) => ({ email, dbId: id }))
+          );
           
           // 🔥 ETAPA 5: Mapear payments usando emails
-          console.log('📝 Step 2: Mapping and inserting payments...');
+          console.log('📝 Step 2: Mapping payments...');
           const mappedPayments = mockData.payments.map(payment => {
             const mockStudent = mockData.students.find(s => s.id === payment.studentId);
-            if (mockStudent) {
-              const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
-              if (dbStudentId) {
-                console.log(`🔗 Payment: mock student ${payment.studentId} -> DB student ${dbStudentId}`);
-                return { ...payment, studentId: dbStudentId };
-              }
+            if (!mockStudent) {
+              console.error(`❌ Mock student not found for payment studentId ${payment.studentId}`);
+              return null;
             }
-            console.warn(`⚠️ Could not map payment for student ID ${payment.studentId}`);
-            return payment;
-          });
+            
+            const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
+            if (!dbStudentId) {
+              console.error(`❌ DB student ID not found for email ${mockStudent.email}`);
+              return null;
+            }
+            
+            console.log(`🔗 Payment mapped: mock ${payment.studentId} (${mockStudent.email}) -> DB ${dbStudentId}`);
+            return { ...payment, studentId: dbStudentId };
+          }).filter(Boolean) as Payment[];
           
-          await storage.set('payments', mappedPayments);
+          console.log(`✅ ${mappedPayments.length}/${mockData.payments.length} payments successfully mapped`);
+          
+          if (mappedPayments.length === 0) {
+            console.warn('⚠️ No payments to insert, skipping...');
+          } else {
+            console.log('💾 Inserting payments...');
+            await storage.set('payments', mappedPayments);
+          }
           
           // 🔥 ETAPA 6: Mapear checkins usando emails
-          console.log('📝 Step 3: Mapping and inserting checkins...');
+          console.log('📝 Step 3: Mapping checkins...');
           const mappedCheckins = mockData.checkins.map(checkin => {
             const mockStudent = mockData.students.find(s => s.id === checkin.studentId);
-            if (mockStudent) {
-              const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
-              if (dbStudentId) {
-                console.log(`🔗 Checkin: mock student ${checkin.studentId} -> DB student ${dbStudentId}`);
-                return { ...checkin, studentId: dbStudentId };
-              }
+            if (!mockStudent) {
+              console.error(`❌ Mock student not found for checkin studentId ${checkin.studentId}`);
+              return null;
             }
-            console.warn(`⚠️ Could not map checkin for student ID ${checkin.studentId}`);
-            return checkin;
-          });
+            
+            const dbStudentId = emailToDbId.get(mockStudent.email.toLowerCase());
+            if (!dbStudentId) {
+              console.error(`❌ DB student ID not found for email ${mockStudent.email}`);
+              return null;
+            }
+            
+            return { ...checkin, studentId: dbStudentId };
+          }).filter(Boolean) as Checkin[];
           
-          await storage.set('checkins', mappedCheckins);
+          console.log(`✅ ${mappedCheckins.length}/${mockData.checkins.length} checkins successfully mapped`);
+          
+          if (mappedCheckins.length === 0) {
+            console.warn('⚠️ No checkins to insert, skipping...');
+          } else {
+            console.log('💾 Inserting checkins...');
+            await storage.set('checkins', mappedCheckins);
+          }
           
           // 🔥 ETAPA 7: Inserir classes (independente)
           console.log('📝 Step 4: Inserting classes...');
           await storage.set('classes', mockData.classes);
           
           // 🔥 ETAPA 8: Aguardar e recarregar todos os dados
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('⏳ Waiting for final sync...');
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
           const finalStudents = await storage.get<Student[]>('students');
           const finalPayments = await storage.get<Payment[]>('payments');
@@ -130,7 +166,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setCheckins(finalCheckins || []);
           setClasses(finalClasses || []);
           
-          console.log('✅ Seed complete!');
+          console.log('🎉 Seed complete!');
         } else {
           // Carregar dados existentes
           console.log('📂 Loading existing data...');

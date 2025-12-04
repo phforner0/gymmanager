@@ -1,6 +1,6 @@
 # 🏋️ GymManager
 
-**Sistema de gestão de academia** desenvolvido em **React + TypeScript** com foco em modularidade, usabilidade e integração com Supabase. Este README foi atualizado para refletir a versão atual do projeto presente no repositório.
+**Sistema de gestão de academia** desenvolvido em **React + TypeScript** com foco em modularidade, usabilidade e integração com Supabase.
 
 ---
 

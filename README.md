@@ -1,307 +1,156 @@
-# 🏋️ GymManager - Sistema de Gestão de Academia
+# 🏋️ GymManager
 
-Sistema completo para gestão de academias desenvolvido em React + TypeScript com arquitetura modular e componentizada.
+**Sistema de gestão de academia** desenvolvido em **React + TypeScript** com foco em modularidade, usabilidade e integração com Supabase. Este README foi atualizado para refletir a versão atual do projeto presente no repositório.
 
-## 📋 Características
+---
 
-- **Gestão de Alunos**: Cadastro completo, busca, filtros e exportação CSV
-- **Agenda de Aulas**: Calendário semanal com gestão de horários e instrutores
-- **Check-in Digital**: Sistema rápido de registro de entrada
-- **Financeiro**: Controle de pagamentos, mensalidades e inadimplência
-- **Relatórios**: Dashboard com métricas, gráficos e análises
-- **Design Responsivo**: Interface adaptável para desktop, tablet e mobile
+## 🔎 Visão geral
 
-## 🚀 Tecnologias
+GymManager é uma aplicação web para academias que reúne funcionalidades essenciais para a gestão do dia a dia: cadastro de alunos, agenda de aulas, check-in digital, controle financeiro de mensalidades, relatórios e dashboards com métricas úteis.
 
-- **React 18** - Biblioteca UI
-- **TypeScript** - Tipagem estática
-- **Vite** - Build tool e dev server
-- **Recharts** - Gráficos e visualizações
-- **Lucide React** - Ícones modernos
-- **LocalStorage** - Persistência de dados local
+O projeto está organizado em módulos principais (Admin, User, LandingPage) para separar responsabilidades e facilitar manutenção e evolução.
 
-## 📁 Estrutura do Projeto
+---
 
-```
-gym-manager/
-├── src/
-│   ├── Admin/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   ├── index.html
-│   │   ├── components/
-│   │   │   ├── Modal.tsx
-│   │   │   └── Toast.tsx
-│   │   ├── context/
-│   │   │   └── AppContext.tsx
-│   │   ├── pages/
-│   │   │   ├── Checkin.tsx
-│   │   │   └── ... (outras páginas do Admin)
-│   │   ├── services/
-│   │   │   └── ... (serviços específicos do Admin)
-│   │   └── styles/
-│   │       └── ... 
-│   │
-│   ├── LandingPage/
-│   │   ├── pages/
-│   │   │   └── LandingPage.tsx
-│   │   ├── hooks/
-│   │   │   ├── useScrolled.tsx
-│   │   │   └── useToast.tsx
-│   │   ├── services/
-│   │   │   ├── auth.service.ts
-│   │   │   └── storage.service.ts
-│   │   ├── styles/
-│   │   │   └── global.css
-│   │   ├── types/
-│   │   │   └── index.ts
-│   │   └── utils/
-│   │       ├── constants.ts
-│   │       └── validation.ts
-│   │
-│   ├── athlete-dashboard.tsx
-│   ├── App.tsx
-│   ├── LandingPage.tsx
-│   └── main.tsx
-│
-├── README.md
+## ⚙️ Principais funcionalidades
 
-```
+- **Gestão de alunos**: cadastro, atualização, busca, filtros e exportação CSV
+- **Planos e cobranças**: gerenciamento de planos, pagamentos e controle de inadimplência
+- **Agenda de aulas**: programação semanal, horários e instrutores
+- **Check-in digital**: registro de entrada/saída de usuários
+- **Dashboard / Relatórios**: KPIs (receita, check-ins, novos alunos), gráficos e tendências (usa *recharts*)
+- **Autenticação e permissões**: integração com Supabase Auth; rotas protegidas por perfil (admin / athlete)
+- **Armazenamento**: integração com Supabase (sincronização remota) e services locais (em memória) para o landing page
+- **Design responsivo**: interface adaptada para desktop, tablet e mobile
+- **Testes**: testes unitários e utilitários (Vitest / Testing Library) já presentes no código
 
-## 🛠️ Instalação
+---
 
-1. **Clone o repositório**
+## 🧱 Arquitetura & organização do repositório
+
+Estrutura de alto nível (pasta `src`):
+
+- `Admin/` — páginas e componentes de administração
+- `User/` — área do usuário/atleta (dashboards, métricas individuais)
+- `LandingPage/` — páginas públicas, marketing, e serviços utilitários (ex.: `storage.service.ts`)
+- `lib/` — integrações externas (ex.: `supabase.ts`)
+- `shared/` / `components/` — componentes reutilizáveis, modais, toasts
+- `styles/` — CSS global
+- `test/` — mock data, setup e utilitários de teste
+- `types/` — definições TypeScript centralizadas
+
+> Arquivo importante: `src/lib/supabase.ts` — cria o cliente Supabase e expõe tipos de banco. Verifique as variáveis de ambiente necessárias antes de rodar a aplicação.
+
+---
+
+## 🧩 Tecnologias
+
+- React (v19) + TypeScript
+- Vite (bundler / dev server)
+- Supabase (Auth, Database)
+- Recharts (gráficos)
+- Lucide (ícones)
+- Vitest + Testing Library (testes)
+- ESLint (qualidade de código)
+
+---
+
+## 🛠️ Como rodar localmente
+
+**Requisitos**
+- Node.js (recomendado 18+)
+- NPM ou Yarn
+
+**Passos**
+
+1. Clone o repositório
+
 ```bash
-git clone https://github.com/seu-usuario/gym-manager.git
-cd gym-manager
+git clone <REPO_URL>
+cd gymmanager-main
+cd gymmanager-main
 ```
 
-2. **Instale as dependências**
+2. Instale as dependências
+
 ```bash
 npm install
 # ou
-yarn install
-# ou
-pnpm install
+# yarn
 ```
 
-3. **Inicie o servidor de desenvolvimento**
+3. Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto (mesma pasta onde está `package.json`) com as variáveis necessárias do Supabase:
+
+```
+VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
+VITE_SUPABASE_ANON_KEY=<sua-anon-key>
+```
+
+> Observação: o código faz `throw` se as variáveis não estiverem configuradas — ver `src/lib/supabase.ts`.
+
+4. Rodar em modo de desenvolvimento
+
 ```bash
 npm run dev
-# ou
-yarn dev
-# ou
-pnpm dev
 ```
 
-4. **Acesse no navegador**
-```
-http://localhost:3000
-```
-
-## 📦 Build para Produção
+5. Build para produção
 
 ```bash
 npm run build
+```
+
+6. Pré-visualizar o build
+
+```bash
+npm run preview
+```
+
+---
+
+## 🔐 Configuração no Supabase
+
+- Crie um projeto no Supabase
+- Configure tabelas mínimas (users, profiles, students, classes, payments, checkins, etc.) conforme os tipos usados em `src/lib/supabase.ts`.
+- Habilite Auth (e-mail/senha) se quiser usar o fluxo de login padrão.
+- Adicione as chaves no Vercel (ou outro host) se for fazer deploy.
+
+---
+
+## 🧪 Testes
+
+O repositório contém testes com Vitest e utilitários da Testing Library. Não há um script `test` no `package.json` por padrão; você pode executar os testes com:
+
+```bash
+npx vitest
 # ou
-yarn build
-# ou
-pnpm build
+npx vitest run
 ```
 
-Os arquivos otimizados estarão em `dist/`
-
-## 🎯 Funcionalidades Detalhadas
-
-### Dashboard
-- Cards com métricas principais (total de alunos, ativos, receita, check-ins)
-- Gráfico de evolução de membros (últimos 6 meses)
-- Gráfico de check-ins (últimos 7 dias)
-- Feed de atividades recentes
-- Alertas de inadimplência
-
-### Gestão de Alunos
-- Cadastro completo (nome, email, telefone, CPF, data nascimento)
-- Busca por nome, email ou telefone
-- Filtros por status (ativo, inativo, inadimplente)
-- Paginação inteligente
-- Edição inline de dados
-- Exportação para CSV
-- Status visual (badges coloridos)
-
-### Agenda de Aulas
-- Calendário semanal interativo
-- Cadastro de aulas com horário e instrutor
-- Controle de capacidade e inscritos
-- Edição e exclusão de aulas
-- Visualização por dia da semana
-
-### Check-in
-- Busca rápida de aluno por nome, email ou ID
-- Confirmação de check-in com um clique
-- Validação de status do aluno
-- Alerta para inadimplentes
-- Histórico dos últimos check-ins
-- Opção de desfazer check-in
-
-### Financeiro
-- Listagem de todos os pagamentos
-- Filtros por status (pago, pendente, vencido)
-- Filtros por período (data inicial/final)
-- Cards com totalizadores
-- Confirmação rápida de pagamento
-- Indicadores visuais de status
-
-### Relatórios
-- Taxa de retenção por coorte
-- Gráfico de horários de pico
-- Distribuição de aulas por instrutor
-- Análises de tendências
-
-### Configurações
-- Visualização de planos disponíveis
-- Exportação completa de dados (backup JSON)
-- Limpeza de dados do sistema
-
-## 💾 Persistência de Dados
-
-Os dados são armazenados localmente usando **LocalStorage**:
-
-- ✅ Persistência automática entre sessões
-- ✅ Cache em memória para performance
-- ✅ Backup/restore via JSON
-- ✅ 50 alunos de demonstração ao iniciar
-
-### Estrutura de Dados
-
-```typescript
-// Students
-interface Student {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  cpf: string;
-  birthDate: string;
-  joinDate: string;
-  plan: string;
-  monthlyFee: number;
-  status: 'active' | 'inactive';
-  paymentStatus: 'up-to-date' | 'overdue';
-  lastCheckin: string;
-  notes: string;
-}
-
-// Classes
-interface ClassSchedule {
-  id: number;
-  name: string;
-  instructor: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  capacity: number;
-  enrolled: number;
-  description: string;
-}
-
-// Payments
-interface Payment {
-  id: number;
-  studentId: number;
-  amount: number;
-  date: string;
-  method: string;
-  status: 'paid' | 'pending' | 'overdue';
-  description: string;
-}
-
-// Checkins
-interface Checkin {
-  id: number;
-  studentId: number;
-  timestamp: string;
-}
-```
-
-## 🎨 Personalização
-
-### Cores
-Edite `src/styles/global.css` para alterar o esquema de cores:
-
-```css
-/* Cores principais */
---primary: #6366f1;
---success: #10b981;
---danger: #ef4444;
---warning: #f59e0b;
-```
-
-## 🔒 Segurança
-
-- Validação de formulários
-- Confirmação para ações destrutivas
-- Sanitização de entradas
-- Prevenção de XSS
-
-## 📱 Responsividade
-
-- **Desktop**: Layout completo com sidebar fixa
-- **Tablet**: Ajuste de grids (4 colunas → 2 colunas)
-- **Mobile**: Menu colapsável, layout single-column
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abra um Pull Request
-
-## 🏃‍♂️ Sprints
-
-Abaixo estão os **Sprints** planejados para o projeto. Cada sprint tem objetivo, issues incluídos e critérios de aceitação.
+Observação: os testes usam mocks de `localStorage` quando necessário (ver `src/*/test`).
 
 ---
 
-### Sprint 01
-**Objetivo:** Finalizar work in progress e revisar/aceitar autenticação e redirecionamento para permitir deploy estável.  
-**Issues atribuídos:** `#8`, `#1`, `#17`
+## 📦 Scripts úteis (conforme `package.json`)
 
-**Critérios de aceitação (por issue):**
-- **#8 — Interface de busca para check-in**
-  - Busca retorna lista paginada / filtrada por nome/CPF.
-  - UI mostra estado de loading e mensagem quando não há resultados.
-  - Teste manual OK em navegadores suportados.
-- **#1 — Autenticação com Supabase (revisão)**
-  - PR revisado e aprovado; fluxo de login/logout testado.
-- **#17 — Validar redirecionamento pós-login**
-  - Login redireciona `user` → `/athlete-dashboard`.
-  - Evidências de teste anexadas à issue.
-
-**Checklist do sprint**
-- [ ] Mover issues para a coluna In progress no Project
-- [ ] Entregar e fechar issues até o fim do sprint
+- `npm run dev` — inicia o servidor Vite (desenvolvimento)
+- `npm run build` — compila o projeto (TypeScript + Vite)
+- `npm run preview` — visualiza o build localmente
+- `npm run lint` — executa o ESLint
 
 ---
 
-### Sprint 02 — *Features & Refactor*
-**Período:** 2025-12-15 → 2025-12-28  
-**Objetivo:** Entregar autenticação real, testes automatizados, KPIs do dashboard, refatorar componentes compartilhados e proteger rotas.  
-**Issues atribuídos:**  `#7`, `#15`, `#16`
+## 🤝 Como contribuir
 
-**Critérios de aceitação (por issue):**
-- **#7 — Dashboard com KPIs principais**
-  - KPIs (receita, check-ins diários, novos alunos) visíveis e atualizados.
-- **#15 — Refatorar componentes compartilhados**
-  - `Modal` e `Toast` movidos para `src/shared/components` e imports atualizados.
-- **#16 — PrivateRoute / proteção de rotas**
-  - Guards implementados para rotas admin e athlete; testes manuais OK.
+1. Abra uma issue descrevendo a mudança
+2. Crie uma branch `feature/<nome>`
+3. Faça commits claros e pequenos
+4. Abra um Pull Request
 
 ---
 
-## 📄 Licença
+## 🧾 Licença
 
-Veja o arquivo `LICENSE` para mais detalhes.
-
----
+Projeto licenciado conforme o arquivo `LICENSE` presente no repositório.
